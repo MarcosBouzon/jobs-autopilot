@@ -1,0 +1,57 @@
+import asyncio
+import logging
+
+from celery import Task
+
+from app.celery_app import celery
+from app.models.job import JobPost
+from app.tasks.utils import get_task_db, task_lock
+
+logger = logging.getLogger(__name__)
+
+
+@celery.task(bind=True)
+def score_job(self: Task, job: dict) -> dict[str, str]:  # type: ignore[type-arg]
+    """Score a job posting using an LLM.
+
+    Args:
+        job: Job document dict (with string `_id`).
+
+    Returns:
+        Dict with task result status and job_id.
+    """
+
+    job_post = JobPost.model_validate(job)
+
+    # TODO: implement scoring logic
+    return {"status": "done", "job_id": job_post.id or ""}
+
+
+@celery.task
+def score_jobs() -> dict[str, object]:  # type: ignore[type-arg]
+    """Retrieve unscored jobs and dispatch a score task for each.
+
+    Queries all jobs with no score or a score of 0.0 and dispatches
+    score_job for each.
+
+    Returns:
+        Dict with dispatched job IDs.
+    """
+
+    with task_lock("score_jobs") as acquired:
+        if not acquired:
+            return {"status": "skipped"}
+
+        async def _run() -> dict[str, object]:
+            db = get_task_db()
+
+            cursor = db.jobs.find(
+                {"$or": [{"score": {"$exists": False}}, {"score": 0.0}]}
+            )
+            jobs = [{**doc, "_id": str(doc["_id"])} async for doc in cursor]
+            logger.info("Dispatching score tasks for %d jobs", len(jobs))
+
+            for job in jobs:
+                score_job.delay(job=job)
+
+        return asyncio.run(_run())

@@ -1,0 +1,68 @@
+services:
+  mongodb:
+    image: mongo:8.0
+    container_name: mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./backend/mongodb:/data/db
+    environment:
+      MONGO_INITDB_DATABASE: jobs_autopilot
+
+  redis:
+    image: redis:7.4-alpine
+    container_name: redis
+    restart: unless-stopped
+    ports:
+      - "16379:6379"
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: backend
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    depends_on:
+      - mongodb
+      - redis
+    volumes:
+      - ./backend/resumes:/app/resumes
+
+  worker:
+    build:
+      context: .
+      dockerfile: worker/Dockerfile
+    container_name: worker
+    restart: unless-stopped
+    environment:
+      MONGO_URL: mongodb://mongodb:27017
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      CELERY_BROKER_URL: redis://redis:6379/1
+    depends_on:
+      - mongodb
+      - redis
+    volumes:
+      - ./backend/resumes:/app/resumes
+      - ./backend/app:/app/app
+
+  scheduler:
+    build:
+      context: .
+      dockerfile: worker/Dockerfile
+    container_name: scheduler
+    restart: unless-stopped
+    environment:
+      MONGO_URL: mongodb://mongodb:27017
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      CELERY_BROKER_URL: redis://redis:6379/1
+    depends_on:
+      - mongodb
+      - redis
+    volumes:
+      - ./backend/app:/app/app
+    command: ["uv", "run", "watchfiles", "--filter", "python", "celery -A app.celery_app beat --loglevel=info", "app"]
