@@ -23,6 +23,7 @@ class JobPost(BaseModel):
     url: str
     keywords: list[str] = []
     reasoning: str = ""
+    resume_path: str = ""
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -45,3 +46,4 @@ class JobPostCreate(BaseModel):
     applied: bool = False
     keywords: list[str] = []
     reasoning: str = ""
+    resume_path: str = ""

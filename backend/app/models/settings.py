@@ -19,6 +19,7 @@ class Config(BaseModel):
     remote: bool = False
     hybrid: bool = False
     on_site: bool = False
+    min_score: float = 7.0
 
 
 class Form(BaseModel):
@@ -43,6 +44,7 @@ class Form(BaseModel):
     current_title: str = ""
     target_role: list[str] = []
     years_of_experience: str = ""
+    school: str = ""
     education_level: str = ""
     programming_languages: list[str] = []
     frameworks: list[str] = []

@@ -18,15 +18,15 @@ celery.conf.update(
     beat_schedule={
         "fetch-jobs": {
             "task": "app.tasks.fetch.fetch_jobs",
-            "schedule": crontab(minute="0, 30"),
+            "schedule": crontab(minute="*/20"), # every 20 minutes
         },
         "score-jobs": {
             "task": "app.tasks.score.score_jobs",
-            "schedule": crontab(minute="0,15,30,45"),
+            "schedule": crontab(minute="*/5"), # every 5 minutes
         },
         "apply-jobs": {
             "task": "app.tasks.apply.apply_jobs",
-            "schedule": crontab(minute="0,15,30,45"),
+            "schedule": crontab(minute="*/10"), # every 10 minutes
         },
     },
 )
