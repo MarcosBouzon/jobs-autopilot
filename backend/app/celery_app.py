@@ -18,7 +18,7 @@ celery.conf.update(
     beat_schedule={
         "fetch-jobs": {
             "task": "app.tasks.fetch.fetch_jobs",
-            "schedule": crontab(minute=0),
+            "schedule": crontab(minute="0, 30"),
         },
         "score-jobs": {
             "task": "app.tasks.score.score_jobs",

@@ -11,8 +11,8 @@ from app.tasks.utils import get_task_db, task_lock
 logger = logging.getLogger(__name__)
 
 
-@celery.task(bind=True)
-def apply_job(self: Task, job: dict) -> dict[str, str]:  # type: ignore[type-arg]
+@celery.task
+def apply_job(job: dict) -> dict[str, str]:  # type: ignore[type-arg]
     """Automate applying to a job posting using Playwright.
 
     Args:

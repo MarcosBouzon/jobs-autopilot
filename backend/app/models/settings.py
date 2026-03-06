@@ -2,10 +2,64 @@ from pydantic import BaseModel, Field
 
 SETTINGS_DOC_ID = "singleton"
 
+from pydantic import BaseModel
+
+
+class Config(BaseModel):
+    openai_api_key: str = ""
+    gemini_api_key: str = ""
+    claude_api_key: str = ""
+    local_llm_path: str = ""
+    local_llm_model: str = ""
+    li_at: str = ""
+    li_rm: str = ""
+    jsession_id: str = ""
+    linkedin_user: str = ""
+    linkedin_pass: str = ""
+    remote: bool = False
+    hybrid: bool = False
+    on_site: bool = False
+
+
+class Form(BaseModel):
+    first_name: str = ""
+    last_name: str = ""
+    email: str = ""
+    phone: str = ""
+    address: str = ""
+    city: str = ""
+    state: str = ""
+    country: str = ""
+    zip_code: str = ""
+    linkedin_url: str = ""
+    website_url: str = ""
+    portfolio_url: str = ""
+    legally_authorized: str = ""
+    require_sponsorship: str = ""
+    work_permit_type: str = ""
+    salary: str = ""
+    currency: str = ""
+    salary_range: str = ""
+    current_title: str = ""
+    target_role: list[str] = []
+    years_of_experience: str = ""
+    education_level: str = ""
+    programming_languages: list[str] = []
+    frameworks: list[str] = []
+    tools: list[str] = []
+    earliest_start_date: str = "Immediately"
+
+
+class Eeo(BaseModel):
+    gender: str = "Decline to self-identify"
+    race_ethnicity: str = "Decline to self-identify"
+    veteran_status: str = "Decline to self-identify"
+    disability_status: str = "Decline to self-identify"
+
 
 class Settings(BaseModel):
     """Application-wide settings stored as a singleton document."""
 
-    eeo: dict = Field(default_factory=dict)  # type: ignore[type-arg]
-    form: dict = Field(default_factory=dict)  # type: ignore[type-arg]
-    config: dict = Field(default_factory=dict)  # type: ignore[type-arg]
+    config: Config = Config()
+    form: Form = Form()
+    eeo: Eeo = Eeo()

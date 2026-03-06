@@ -1,8 +1,9 @@
 import asyncio
 import logging
 
-from celery import Task
+from bson import ObjectId
 
+from app.agents.scorer import score_job as agent_score_job
 from app.celery_app import celery
 from app.models.job import JobPost
 from app.tasks.utils import get_task_db, task_lock
@@ -10,8 +11,8 @@ from app.tasks.utils import get_task_db, task_lock
 logger = logging.getLogger(__name__)
 
 
-@celery.task(bind=True)
-def score_job(self: Task, job: dict) -> dict[str, str]:  # type: ignore[type-arg]
+@celery.task
+def score_job(job: dict) -> dict[str, str]:  # type: ignore[type-arg]
     """Score a job posting using an LLM.
 
     Args:
@@ -23,8 +24,26 @@ def score_job(self: Task, job: dict) -> dict[str, str]:  # type: ignore[type-arg
 
     job_post = JobPost.model_validate(job)
 
-    # TODO: implement scoring logic
-    return {"status": "done", "job_id": job_post.id or ""}
+    async def _run() -> dict[str, str]:
+        result = await agent_score_job(job_post)
+        if result is None:
+            return {"status": "no_llm", "job_id": job_post.id or ""}
+
+        db = get_task_db()
+        await db.jobs.update_one(
+            {"_id": ObjectId(job_post.id)},
+            {
+                "$set": {
+                    "score": result.score,
+                    "keywords": result.keywords,
+                    "reasoning": result.reasoning,
+                }
+            },
+        )
+
+        return {"status": "done", "job_id": job_post.id or ""}
+
+    return asyncio.run(_run())
 
 
 @celery.task

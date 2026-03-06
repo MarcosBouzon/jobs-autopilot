@@ -1,7 +1,7 @@
 # Jobs Autopilot Frontend — Project Memory
 
 ## Project Overview
-Frontend for a LinkedIn job scraping platform. React 19 SPA communicating with a FastAPI backend (not yet built). Backend will delegate scraping to a Celery worker (Redis broker) storing jobs in MongoDB.
+Frontend for a LinkedIn job scraping platform. React 19 SPA communicating with a FastAPI backend at localhost:5000. Backend delegates scraping to a Celery worker (Redis broker) storing jobs in MongoDB.
 
 ## Stack
 - React 19.2, Vite 7.3, ESLint 9 flat config
@@ -32,14 +32,12 @@ src/
   pages/
     HomePage.jsx              # Summary cards + jobs table
     JobDetailsPage.jsx        # Single job view
-    AppliedPage.jsx           # Placeholder
+    AppliedPage.jsx           # Applied jobs (uses getJobs(?applied=true))
     SettingsPage.jsx          # Placeholder
     LivePage.jsx              # Grid of active task cards
     LiveDetailPage.jsx        # Full-screen live frame viewer for one task
   context/
     ThemeContext.jsx          # AppThemeProvider + useThemeToggle hook
-  data/
-    mockData.js               # Mock jobs + formatSalary() + getSummary()
   store/
     apiSlice.js               # RTK Query API slice (all endpoint definitions)
     store.js                  # Redux configureStore with RTK Query middleware
@@ -56,22 +54,25 @@ src/
 - `/live` — Grid of active task cards
 - `/live/:taskId` — Full-screen live view for a single task
 
-## Mock Data Shape (src/mockData.js)
+## Backend API (FastAPI at localhost:5000)
+### JobPost schema
 ```js
-{
-  id: "1",                               // string (URL-safe)
-  name: "Senior Frontend Engineer",
-  location: "Remote",                    // Remote | Hybrid | OnSite
-  salary: { amount: 165000, type: "yearly" }, // or { amount: 85, type: "hourly" }
-  company: "Stripe",
-  score: 9.2,                            // float 1-10
-  applied: true,
-  url: "https://example.com/jobs/1",
-  description: "Full job description..."
-}
+{ _id, title, description, location, salary, company, job_board, score, applied }
 ```
-- `formatSalary(salary)` → `"$165K"` or `"$85/hr"`
-- `getSummary(jobs)` → `{ total, scored, tailored, applied }`
+- `_id`: string (MongoDB ObjectId), `title`/`description`/`location`/`job_board`: required strings
+- `salary`/`company`: nullable strings, `score`: float (default 0), `applied`: bool (default false)
+### Endpoints
+- `GET /api/jobs/?applied=bool` — list (filter optional)
+- `GET /api/jobs/{jid}/` — single job
+- `DELETE /api/jobs/{jid}/` — 204
+- `GET /api/settings/` — `{ eeo: {}, form: {}, config: {} }`
+- `PATCH /api/settings/` — update
+- `POST /api/score/{id}/` — dispatch Celery score task
+- `POST /api/apply/{id}/` — dispatch Celery apply task
+- `POST /api/resume/` — PDF upload (multipart, field: `file`)
+- No `/api/applied/` — use `GET /api/jobs/?applied=true`
+### Vite proxy
+- `/api` → `http://127.0.0.1:5000`, `/ws` → `ws://127.0.0.1:5000`
 
 ## Key Conventions
 - MUI 7 Grid uses `size={{ xs: 6, md: 3 }}` (not legacy `xs`/`md` props)
@@ -90,11 +91,11 @@ Jobs | Applied | Live | Settings | ThemeToggle (dark/light icon)
 - Custom MUI theme: no boxShadow on AppBar, uppercase table headers
 
 ## RTK Query (src/store/)
-- `apiSlice.js`: `createApi` with `baseUrl: "/api"`, tagTypes: Job, Applied, Settings
-- Queries: `getJobs`, `getJob`, `getApplied`, `getSettings`
-- Mutations: `scoreJob`, `applyJob`, `updateSettings`, `deleteJob`
-- Exported hooks: `useGetJobsQuery`, `useGetJobQuery`, etc.
-- Pages still use mock data — RTK Query hooks defined but not yet wired in
+- `apiSlice.js`: `createApi` with `baseUrl: "/api"`, tagTypes: Job, Settings
+- Queries: `getJobs(applied?)`, `getJob(id)`, `getSettings`
+- Mutations: `scoreJob(id)`, `applyJob(id)`, `updateSettings(body)`, `deleteJob(id)`, `uploadResume(file)`
+- All pages wired to RTK Query (HomePage, JobDetailsPage, AppliedPage, JobsTable)
+- `mockData.js` deleted — all data comes from the backend API
 
 ## Live View (WebSocket Screenshot Stream)
 - `useTaskStream(taskId)` hook opens `ws://localhost:8000/ws/live/${taskId}`
@@ -114,11 +115,10 @@ Jobs | Applied | Live | Settings | ThemeToggle (dark/light icon)
 - Apply: `SendOutlined` (green)
 - Delete: `DeleteOutline` (red)
 
-## Backend (Not Yet Built)
-- FastAPI backend will serve REST API to the frontend
+## Backend (Running)
+- FastAPI backend at `localhost:5000`
 - Celery worker (Redis broker) handles LinkedIn scraping + AI job application
 - MongoDB stores job data
-- All API calls are stubs/mock data for now
 
 ## Playwright MCP Testing
 - Always test UI changes using Playwright MCP

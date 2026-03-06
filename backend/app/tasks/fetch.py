@@ -27,7 +27,7 @@ def fetch_jobs_for_board(board: str) -> dict:
 
     async def _run() -> dict:
         try:
-            job_board: Scrapper = JOB_BOARDS[board]()
+            job_board: Scrapper = await JOB_BOARDS[board].create()
         except KeyError:
             logger.error("Unknown job board: %s", board)
             return {"status": "error", "message": f"Unknown job board: {board}"}

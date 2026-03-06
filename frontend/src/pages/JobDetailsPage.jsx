@@ -6,14 +6,25 @@ import Paper from "@mui/material/Paper";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import Divider from "@mui/material/Divider";
-import { JOBS, formatSalary } from "../data/mockData.js";
+import CircularProgress from "@mui/material/CircularProgress";
+import Alert from "@mui/material/Alert";
+import { useGetJobQuery, useApplyJobMutation } from "../store/apiSlice.js";
 
 function JobDetailsPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const job = JOBS.find((j) => j.id === id);
+  const { data: job, isLoading, error } = useGetJobQuery(id);
+  const [applyJob] = useApplyJobMutation();
 
-  if (!job) {
+  if (isLoading) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", mt: 8 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (error) {
     return (
       <Box sx={{ textAlign: "center", mt: 8 }}>
         <Typography variant="h5">Job not found</Typography>
@@ -35,13 +46,15 @@ function JobDetailsPage() {
         }}
       >
         <Box>
-          <Typography variant="h4">{job.name}</Typography>
+          <Typography variant="h4">{job.title}</Typography>
           <Stack direction="row" spacing={2} sx={{ mt: 1, alignItems: "center" }}>
-            <Typography color="text.secondary">{job.company}</Typography>
+            {job.company && (
+              <Typography color="text.secondary">{job.company}</Typography>
+            )}
             <Typography color="text.secondary">{job.location}</Typography>
-            <Typography color="text.secondary">
-              {formatSalary(job.salary)}
-            </Typography>
+            {job.salary && (
+              <Typography color="text.secondary">{job.salary}</Typography>
+            )}
             <Typography color="text.secondary">
               Score: {job.score}
             </Typography>
@@ -53,15 +66,25 @@ function JobDetailsPage() {
           </Stack>
         </Box>
         <Stack direction="row" spacing={1}>
-          <Button variant="contained" color="primary">
-            Apply
-          </Button>
-          <Button
-            variant="outlined"
-            onClick={() => window.open(job.url, "_blank")}
-          >
-            Manual Apply
-          </Button>
+          {!job.applied && (
+            <>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => applyJob(job._id)}
+              >
+                Apply
+              </Button>
+              <Button
+                variant="outlined"
+                href={job.url}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Manual Apply
+              </Button>
+            </>
+          )}
         </Stack>
       </Box>
       <Divider sx={{ mb: 3 }} />

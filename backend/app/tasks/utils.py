@@ -1,3 +1,4 @@
+import json
 from collections.abc import Generator
 from contextlib import contextmanager
 
@@ -12,6 +13,7 @@ _LOCK_TTL_MS = 60 * 60 * 1000
 
 def get_task_db() -> AsyncIOMotorDatabase:  # type: ignore[type-arg]
     """Create a standalone Motor client for use in Celery tasks."""
+
     client: AsyncIOMotorClient = AsyncIOMotorClient(config.mongo_url)  # type: ignore[type-arg]
     return client[config.mongo_db]
 
@@ -34,3 +36,9 @@ def task_lock(task_name: str) -> Generator[bool, None, None]:
     finally:
         if acquired:
             client.delete(lock_key)
+
+
+def publish_message(channel: str, message: dict) -> None:
+    """Publish a JSON message to a Redis pub/sub channel."""
+    client = redis.from_url(config.redis_url)
+    client.publish(channel, json.dumps(message))

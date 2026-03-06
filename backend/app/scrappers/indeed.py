@@ -5,9 +5,15 @@ from app.scrappers import Scrapper
 class Indeed(Scrapper):
     """Scrapper implementation for Indeed job postings."""
 
+    @classmethod
+    async def create(cls) -> "Indeed":
+        """Async factory that creates an Indeed scrapper instance."""
+        return cls()
+
     async def fetch_jobs(self) -> list[JobPost]:
         """Fetch job postings from Indeed.
 
         Returns:
             List of job posting dicts.
         """
+        return []

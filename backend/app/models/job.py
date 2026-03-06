@@ -11,6 +11,7 @@ class JobPost(BaseModel):
     """A job posting scraped from a job board."""
 
     id: PyObjectId | None = Field(default=None, alias="_id")
+    job_id: str
     title: str
     description: str
     location: str
@@ -19,6 +20,9 @@ class JobPost(BaseModel):
     job_board: str
     score: float = 0.0
     applied: bool = False
+    url: str
+    keywords: list[str] = []
+    reasoning: str = ""
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -29,11 +33,15 @@ class JobPost(BaseModel):
 class JobPostCreate(BaseModel):
     """Payload for creating a new job posting."""
 
+    job_id: str
     title: str
     description: str
     location: str
     salary: str | None = None
     company: str | None = None
     job_board: str
+    url: str
     score: float = 0.0
     applied: bool = False
+    keywords: list[str] = []
+    reasoning: str = ""
