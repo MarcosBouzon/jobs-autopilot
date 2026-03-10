@@ -1,7 +1,7 @@
 from app.models.settings import Settings
 
 
-def build_taylor_prompt(settings: Settings, resume: str, job_description: str) -> str:
+def build_taylor_prompt(settings: Settings) -> str:
     SYSTEM_PROMPT = f"""You are a senior technical reqruiter rewriting a resume to get this
 candidate an interview for a specific job. You have the candidate's original resume and
 the job description.

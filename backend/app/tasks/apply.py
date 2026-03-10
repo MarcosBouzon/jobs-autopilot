@@ -52,8 +52,10 @@ def apply_jobs() -> dict[str, object]:  # type: ignore[type-arg]
         async def _run() -> dict[str, object]:
             db = get_task_db()
 
-            settings: Settings = await db.settings.find_one({"_id": SETTINGS_DOC_ID})
+            doc = await db.settings.find_one({"_id": SETTINGS_DOC_ID})
+            settings = Settings.model_validate(doc)
             min_score: float = 0.0
+
             if settings:
                 min_score = float(settings.config.min_score)
 

@@ -1,8 +1,6 @@
 import json
-import locale
 import logging
 import re
-from datetime import datetime
 
 from httpx import AsyncClient, TimeoutException
 from pymongo.errors import DuplicateKeyError
@@ -24,10 +22,6 @@ class LinkedIn(Scrapper):
 
     def __init__(self, settings: Settings) -> None:
         super().__init__()
-        try:
-            locale.setlocale(locale.LC_ALL, "en_US.UTF-8")
-        except locale.Error:
-            locale.setlocale(locale.LC_ALL, "en_US.utf8")
 
         self.headers = {
             "user-agent": "Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/119.0",
@@ -160,20 +154,13 @@ class LinkedIn(Scrapper):
                 compensation = compensation[0]
                 median_salary = compensation.get("medianSalary", None)
                 if not median_salary:
-                    min_salary = locale.currency(
-                        float(compensation.get("minSalary")), grouping=True
-                    )
-                    max_salary = locale.currency(
-                        float(compensation.get("maxSalary")), grouping=True
-                    )
+                    min_salary = f"${float(compensation.get('minSalary')):,.2f}"
+                    max_salary = f"${float(compensation.get('maxSalary')):,.2f}"
                 pay_period = compensation.get("payPeriod")
 
                 if pay_period == "YEARLY":
                     if median_salary:
-                        median_salary = locale.currency(
-                            float(median_salary), grouping=True
-                        )
-                        salary = f"{median_salary}K/yr"
+                        salary = f"${float(median_salary):,.0f}K/yr"
                     else:
                         min_salary = str(min_salary).split(",", maxsplit=1)[0]
                         max_salary = str(max_salary).split(",", maxsplit=1)[0]
