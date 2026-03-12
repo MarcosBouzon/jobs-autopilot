@@ -4,6 +4,7 @@ WORKDIR /app
 
 COPY worker/pyproject.toml worker/uv.lock* ./
 RUN uv sync --frozen --no-dev
+RUN uv run playwright install --with-deps chromium
 
 COPY backend/app ./app
 
