@@ -66,3 +66,14 @@ services:
     volumes:
       - ./backend/app:/app/app
     command: ["uv", "run", "watchfiles", "--filter", "python", "celery -A app.celery_app beat --loglevel=info", "app"]
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: autopilot-frontend
+    restart: unless-stopped
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
