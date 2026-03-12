@@ -1,8 +1,17 @@
+import logging
 import os
 
 from dotenv import load_dotenv
 
 load_dotenv()
+
+# Supress verbose logging from dependencies as they add too much noise to the logs
+logging.basicConfig(
+    level=logging.INFO,
+    format="[%(asctime)s] %(levelname)s in %(module)s: %(message)s",
+)
+for _name in ("LiteLLM", "litellm", "openai", "openai.agents", "httpx", "httpcore"):
+    logging.getLogger(_name).setLevel(logging.WARNING)
 
 
 class Config:

@@ -211,9 +211,9 @@ function WorkDetailsStep({ onBack, onNext }) {
             slotProps={{ inputLabel: { shrink: true } }}
           />
         </Grid>
-        <Grid size={{ xs: 12, sm: 6 }}>
+        <Grid size={{ xs: 12, sm: 3 }}>
           <TextField
-            label="Years of professional experience"
+            label="Years of experience"
             type="number"
             value={form.years_of_experience}
             onChange={handleChange("years_of_experience")}
@@ -222,13 +222,22 @@ function WorkDetailsStep({ onBack, onNext }) {
             slotProps={{ inputLabel: { shrink: true } }}
           />
         </Grid>
-        <Grid size={{ xs: 12, sm: 6 }}>
+        <Grid size={{ xs: 12, sm: 4.5 }}>
           <TextField
             label="Highest education level"
             value={form.education_level}
             onChange={handleChange("education_level")}
             fullWidth
             placeholder="Bachelor's, Master's, PhD, Self-taught"
+            slotProps={{ inputLabel: { shrink: true } }}
+          />
+        </Grid>
+        <Grid size={{ xs: 12, sm: 4.5 }}>
+          <TextField
+            label="School"
+            value={form.school}
+            onChange={handleChange("school")}
+            fullWidth
             slotProps={{ inputLabel: { shrink: true } }}
           />
         </Grid>

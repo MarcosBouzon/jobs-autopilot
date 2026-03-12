@@ -37,6 +37,7 @@ const initialState = {
     target_role: "",
     years_of_experience: "",
     education_level: "",
+    school: "",
     remote: false,
     hybrid: false,
     on_site: false,
@@ -45,6 +46,13 @@ const initialState = {
     programming_languages: "",
     frameworks: "",
     tools: "",
+  },
+  llm: {
+    openai_api_key: "",
+    gemini_api_key: "",
+    claude_api_key: "",
+    local_llm_path: "",
+    local_llm_model: "",
   },
 };
 
@@ -67,6 +75,9 @@ const setupSlice = createSlice({
     updateSkills(state, action) {
       Object.assign(state.skills, action.payload);
     },
+    updateLlm(state, action) {
+      Object.assign(state.llm, action.payload);
+    },
   },
 });
 
@@ -76,6 +87,7 @@ export const {
   updateDetails,
   updateWork,
   updateSkills,
+  updateLlm,
 } = setupSlice.actions;
 
 export default setupSlice.reducer;

@@ -24,12 +24,8 @@ def apply_job(job: dict) -> dict[str, str]:  # type: ignore[type-arg]
     job_post = JobPost.model_validate(job)
 
     # TODO: implement apply automation logic
-    # 1.If job don't have a resume_path value:
-    #   1.1. Taylor resume using LLM
-    #   1.2. Save tailored resume to the resumes directory with a unique name and path
-    #   1.3. Update the resume_path field in the job document in the database with the new tailored resume path
-    # 2. Use Playwright to navigate to job application page, fill application form, and upload tailored resume
-    # 3. Mark job as applied in the database
+    # 1. Use Playwright to navigate to job application page, fill application form, and upload tailored resume
+    # 2. Mark job as applied in the database
 
     return {"status": "done", "job_id": job_post.id or ""}
 

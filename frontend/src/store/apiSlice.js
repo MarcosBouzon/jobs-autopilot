@@ -1,9 +1,5 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
-// AQEDARTFYJMECGE8AAABnNKsSIMAAAGc9rjMg04AzmkvrRCh-Sl0KcsT28BJLAK1xrnLzeGYhdHxVs_1kr2vRoFAIVMxDmVN5_1WD6DuycurMWKIEo5dsMTPIxtYNg5y0gObR1fLVSsHe20k4hdTiyGA
-// AQGqfVqJdTnFBQAAAZzSboH0hmVcF5kU1a3LOrbf0Nb3FSloaBT66kKSoEf6ECA0vHdNTfVDoE2rHX4V_igoxomAv8d5SRWqpaJZCMdthwtkhQYJIhy4phm2BdHBavYotn49XxIGWD_KBwqTDP4ykYVlhwSSaIub1T0YUM80hoymbFM89Tgm_8R8PH2Ihnah0YvyxIWRkBsTMBEYe4gofcBVU6ol_nx8gWfGhwY-Dwn-vcvZM92RHX1e1n3VX4HGQFg5pSsEDz5x3JxswDdO-eeYDlqeoZ0u_tY1AdxpHGfUwcPlmamggdiJgF4U_UDrfis3SL4Nldwkw2ooEGmZwQ
-// "ajax:3026106764719428202"
-
 export const api = createApi({
   reducerPath: "api",
   baseQuery: fetchBaseQuery({ baseUrl: "/api" }),

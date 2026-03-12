@@ -11,8 +11,9 @@ import ProfileStep from "./setup/ProfileStep.jsx";
 import DetailsStep from "./setup/DetailsStep.jsx";
 import WorkDetailsStep from "./setup/WorkDetailsStep.jsx";
 import SkillsStep from "./setup/SkillsStep.jsx";
+import LlmStep from "./setup/LlmStep.jsx";
 
-const STEPS = ["Welcome", "LinkedIn", "Resume", "Details", "Work", "Skills"];
+const STEPS = ["Welcome", "LinkedIn", "Resume", "Details", "Work", "Skills", "LLM"];
 
 function SetupPage() {
   const [activeStep, setActiveStep] = useState(0);
@@ -38,7 +39,8 @@ function SetupPage() {
           {activeStep === 2 && <ProfileStep onBack={handleBack} onNext={handleNext} resumeFileRef={resumeFileRef} />}
           {activeStep === 3 && <DetailsStep onBack={handleBack} onNext={handleNext} />}
           {activeStep === 4 && <WorkDetailsStep onBack={handleBack} onNext={handleNext} />}
-          {activeStep === 5 && <SkillsStep onBack={handleBack} resumeFileRef={resumeFileRef} />}
+          {activeStep === 5 && <SkillsStep onBack={handleBack} onNext={handleNext} />}
+          {activeStep === 6 && <LlmStep onBack={handleBack} resumeFileRef={resumeFileRef} />}
         </Paper>
       </Container>
     </Box>

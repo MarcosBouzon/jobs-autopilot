@@ -7,7 +7,7 @@ celery = Celery(
     "jobs_autopilot",
     broker=config.celery_broker_url,
     backend=config.celery_broker_url,
-    include=["app.tasks.fetch", "app.tasks.score", "app.tasks.apply"],
+    include=["app.tasks.fetch", "app.tasks.score", "app.tasks.apply", "app.tasks.taylor"],
 )
 
 celery.conf.update(
@@ -23,6 +23,10 @@ celery.conf.update(
         "score-jobs": {
             "task": "app.tasks.score.score_jobs",
             "schedule": crontab(minute="*/5"), # every 5 minutes
+        },
+        "taylor-resumes": {
+            "task": "app.tasks.taylor.taylor_resumes",
+            "schedule": crontab(minute="*/10"), # every 10 minutes
         },
         "apply-jobs": {
             "task": "app.tasks.apply.apply_jobs",

@@ -50,6 +50,7 @@ class Form(BaseModel):
     frameworks: list[str] = []
     tools: list[str] = []
     earliest_start_date: str = "Immediately"
+    about: str = ""
 
 
 class Eeo(BaseModel):
