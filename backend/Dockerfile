@@ -6,8 +6,8 @@ COPY pyproject.toml uv.lock* ./
 RUN uv sync --frozen --no-dev
 
 COPY app/ ./app/
-COPY uvicorn_config.py ./
+COPY run.py ./
 
 RUN mkdir -p resumes
 
-CMD ["uv", "run", "uvicorn", "--config", "uvicorn_config.py"]
+CMD ["uv", "run", "python", "run.py"]
