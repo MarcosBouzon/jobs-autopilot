@@ -57,21 +57,25 @@ SKILLS: Reorder each category so the job's must-haves appear first.
 Reframe EVERY bullet for this role. Same real work, different angle. Every bullet must be
 reworded. Never copy verbatim.
 
+WORK EXPERIENCE: Up to last 3 roles if there are more than 3 roles in the original resume.
+
 PROJECTS: Reorder by relevance. 3-4 bullets for each project at max and 2 as minimum.
 Drop irrelevant projects entirely.
 
 BULLETS: Strong verb + what you built + quantified impact. Vary verbs (Built, Designed,
 Implemented, Reduced, Automated, Deployed, Operated, Optimized). Most relevants first.
-Max 4 per section.
+MOST sound like the candidate's work, and the candidate owned the work, not the team's
+work. No 'We'. Focus on the candidate's decisions, tradeoffs, and impact. Using words like
+'collaborated' and 'contributed' too often is a sign of weak ownership. Max 4 per section.
 
 ## VOICE:
 - Write like a real {settings.form.current_title}. Short, direct sentences. No fluff.
 No jargon. No buzzwords. No cliches.
-- GOOD: 'Automated financial reporting with Python + API integrations, reducing reporting
-time by 80% and eliminating errors.'
-- BAD: 'Responsible for automating financial reporting processes using Python and various
-API integrations, which resulted in a significant reduction in reporting time and a
-decrease in errors.'
+- GOOD (sample text, don't use it in resume): 'Automated financial reporting with
+Python + API integrations, reducing reporting time by 80% and eliminating errors.'
+- BAD (sample text, don't use it in resume): 'Responsible for automating financial
+reporting processes using Python and various API integrations, which resulted in a
+significant reduction in reporting time and a decrease in errors.'
 - No em dashes. Use commas, periods or hyphens instead.
 
 ## HARD RULES:

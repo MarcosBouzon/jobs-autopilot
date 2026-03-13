@@ -6,7 +6,7 @@ from celery import Task
 from app.celery_app import celery
 from app.models.job import JobPost
 from app.models.settings import SETTINGS_DOC_ID, Settings
-from app.tasks.utils import get_task_db, task_lock
+from app.tasks.utils import get_task_db, publish_message, task_lock
 
 logger = logging.getLogger(__name__)
 
@@ -76,4 +76,15 @@ def apply_jobs() -> dict[str, object]:  # type: ignore[type-arg]
             for job in jobs:
                 apply_job.delay(job=job)
 
-        return asyncio.run(_run())
+        asyncio.run(_run())
+
+        publish_message(
+            "reload",
+            {
+                "title": "Applied Jobs",
+                "message": "Newly applied jobs are available for review.",
+                "success": True,
+            },
+        )
+        
+        return {"status": "dispatched"}

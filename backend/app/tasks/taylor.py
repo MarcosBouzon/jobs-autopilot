@@ -6,13 +6,15 @@ from bson import ObjectId
 from app.agents.taylorer import taylor_resume
 from app.celery_app import celery
 from app.models.job import JobPost
-from app.tasks.utils import get_task_db, task_lock
+from app.tasks.utils import get_task_db, publish_message, task_lock
 
 logger = logging.getLogger(__name__)
 
 
 async def _taylor(job: dict) -> dict[str, str]:
     job_post = JobPost.model_validate(job)
+    logger.info("Tayloring resume for job %s", job_post.title)
+
     result = await taylor_resume(job_post)
     if result is None:
         return {"status": "no_llm", "job_id": job_post.id or ""}
@@ -67,7 +69,7 @@ def taylor_resumes() -> dict[str, object]:  # type: ignore[type-arg]
             jobs = [{**doc, "_id": str(doc["_id"])} async for doc in cursor]
             logger.info("Dispatching taylor tasks for %d jobs", len(jobs))
 
-            for job in jobs[:3]:
+            for job in jobs[:10]:
                 taylor.delay(job=job)
                 # await _taylor(job)
 
