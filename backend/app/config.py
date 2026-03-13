@@ -11,7 +11,7 @@ logging.basicConfig(
     format="[%(asctime)s] %(levelname)s in %(module)s: %(message)s",
 )
 for _name in ("LiteLLM", "litellm", "openai", "openai.agents", "httpx", "httpcore"):
-    logging.getLogger(_name).setLevel(logging.WARNING)
+    logging.getLogger(_name).setLevel(logging.ERROR)
 
 
 class Config:

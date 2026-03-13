@@ -4,7 +4,10 @@ from pydantic import BaseModel
 class ExperienceEntry(BaseModel):
     """A single work experience entry."""
 
-    header: str
+    title: str
+    company: str
+    date_range: str
+    location: str
     bullets: list[str]
 
 
@@ -24,6 +27,13 @@ class Skills(BaseModel):
     tools: str = ""
 
 
+class EducationEntry(BaseModel):
+    school: str
+    degree: str
+    date_range: str
+    description: str
+
+
 class TayloredResume(BaseModel):
     """Structured output from the taylorer agent."""
 
@@ -32,7 +42,7 @@ class TayloredResume(BaseModel):
     skills: Skills
     experience: list[ExperienceEntry]
     projects: list[ProjectEntry]
-    education: str
+    education: list[EducationEntry]
 
 
 class JudgeVeredict(BaseModel):

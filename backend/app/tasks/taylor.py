@@ -37,7 +37,6 @@ def taylor(job: dict) -> dict[str, str]:  # type: ignore[type-arg]
         Dict with task result status and job_id.
     """
 
-    job_post = JobPost.model_validate(job)
     return asyncio.run(_taylor(job))
 
 
@@ -68,8 +67,8 @@ def taylor_resumes() -> dict[str, object]:  # type: ignore[type-arg]
             jobs = [{**doc, "_id": str(doc["_id"])} async for doc in cursor]
             logger.info("Dispatching taylor tasks for %d jobs", len(jobs))
 
-            for job in jobs[:1]:
-                # taylor.delay(job=job)
-                await _taylor(job)
+            for job in jobs[:3]:
+                taylor.delay(job=job)
+                # await _taylor(job)
 
         return asyncio.run(_run())

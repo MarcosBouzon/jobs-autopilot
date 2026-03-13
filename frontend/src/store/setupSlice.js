@@ -23,6 +23,7 @@ const initialState = {
     country: "",
     zip_code: "",
     linkedin_url: "",
+    github_url: "",
     website_url: "",
     portfolio_url: "",
   },

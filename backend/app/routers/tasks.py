@@ -35,7 +35,6 @@ async def initiate_score(jid: str, db: DB) -> dict[str, str]:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Job not found"
         )
-    del job["_id"]
     task = score_job.delay(job=job)
 
     return {"task_id": task.id}
@@ -52,20 +51,7 @@ async def initiate_apply(jid: str, db: DB) -> dict[str, str]:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Job not found"
         )
-    
-    del job["_id"]
+
     task = apply_job.delay(job=job)
 
     return {"task_id": task.id}
-
-
-@router.post("/resume/")
-async def upload_resume(file: UploadFile = File(...)) -> dict[str, str]:
-    """Accept a PDF resume upload and save it to the resumes directory."""
-
-    dest = Path(config.resumes_dir) / "user_resume.pdf"
-    dest.parent.mkdir(parents=True, exist_ok=True)
-    contents = await file.read()
-    dest.write_bytes(contents)
-
-    return {"path": str(dest)}

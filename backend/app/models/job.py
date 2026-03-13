@@ -1,3 +1,4 @@
+from datetime import UTC, datetime
 from typing import Annotated
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -24,6 +25,7 @@ class JobPost(BaseModel):
     keywords: list[str] = []
     reasoning: str = ""
     resume_path: str = ""
+    autopilot_created: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -47,3 +49,4 @@ class JobPostCreate(BaseModel):
     keywords: list[str] = []
     reasoning: str = ""
     resume_path: str = ""
+    autopilot_created: datetime = Field(default_factory=lambda: datetime.now(UTC))

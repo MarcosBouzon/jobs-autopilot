@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.database import lifespan
-from app.routers import jobs, live, settings, tasks
+from app.routers import jobs, live, resume, settings, tasks
 
 API_PREFIX = "/api"
 
@@ -11,6 +11,8 @@ tags_metadata = [
     {"name": "Settings"},
     {"name": "Tasks"},
     {"name": "Live"},
+    {"name": "Resume"},
+    
 ]
 
 app = FastAPI(title="Jobs Autopilot", lifespan=lifespan, openapi_tags=tags_metadata)
@@ -27,3 +29,4 @@ app.include_router(jobs.router, prefix=API_PREFIX)
 app.include_router(settings.router, prefix=API_PREFIX)
 app.include_router(tasks.router, prefix=API_PREFIX)
 app.include_router(live.router, prefix=API_PREFIX)
+app.include_router(resume.router, prefix=API_PREFIX)

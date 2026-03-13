@@ -312,6 +312,7 @@ function DetailsSection({ data, updateSettings }) {
     country: "",
     zip_code: "",
     linkedin_url: "",
+    github_url: "",
     website_url: "",
     portfolio_url: "",
   });
@@ -332,6 +333,7 @@ function DetailsSection({ data, updateSettings }) {
         country: data.form.country ?? "",
         zip_code: data.form.zip_code ?? "",
         linkedin_url: data.form.linkedin_url ?? "",
+        github_url: data.form.github_url ?? "",
         website_url: data.form.website_url ?? "",
         portfolio_url: data.form.portfolio_url ?? "",
       });
@@ -465,13 +467,23 @@ function DetailsSection({ data, updateSettings }) {
         Links
       </Typography>
       <Grid container spacing={2} sx={{ mb: 3 }}>
-        <Grid size={{ xs: 12 }}>
+        <Grid size={{ xs: 12, sm: 6 }}>
           <TextField
             label="LinkedIn URL"
             value={form.linkedin_url}
             onChange={handleChange("linkedin_url")}
             fullWidth
             placeholder="https://linkedin.com/in/yourprofile"
+            slotProps={{ inputLabel: { shrink: true } }}
+          />
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6 }}>
+          <TextField
+            label="GitHub URL"
+            value={form.github_url}
+            onChange={handleChange("github_url")}
+            fullWidth
+            placeholder="https://github.com/yourusername"
             slotProps={{ inputLabel: { shrink: true } }}
           />
         </Grid>

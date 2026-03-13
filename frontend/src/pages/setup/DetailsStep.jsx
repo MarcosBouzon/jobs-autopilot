@@ -143,14 +143,23 @@ function DetailsStep({ onBack, onNext }) {
         Links (optional)
       </Typography>
       <Grid container spacing={2} sx={{ mb: 3 }}>
-        <Grid size={{ xs: 12 }}>
+        <Grid size={{ xs: 12, sm: 6 }}>
           <TextField
             label="LinkedIn URL"
             value={form.linkedin_url}
             onChange={handleChange("linkedin_url")}
             fullWidth
             placeholder="https://linkedin.com/in/yourprofile"
-            helperText="Some applications require this. The autopilot will skip those if missing."
+            slotProps={{ inputLabel: { shrink: true } }}
+          />
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6 }}>
+          <TextField
+            label="GitHub URL"
+            value={form.github_url}
+            onChange={handleChange("github_url")}
+            fullWidth
+            placeholder="https://github.com/yourusername"
             slotProps={{ inputLabel: { shrink: true } }}
           />
         </Grid>

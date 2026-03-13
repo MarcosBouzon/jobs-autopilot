@@ -1,10 +1,12 @@
+import json
 import logging
-import os
 import re
+from datetime import UTC, datetime
 from pathlib import Path
 
 from agents import Runner
 from litellm.exceptions import RateLimitError, ServiceUnavailableError
+from openai import APIConnectionError
 
 from app.agents.schema import JudgeVeredict, TayloredResume
 from app.agents.utils import (
@@ -24,17 +26,17 @@ logger = logging.getLogger(__name__)
 def _build_taylor_prompt(settings: Settings) -> str:
     """Build the system prompt for the Taylorer agent, incorporating user settings."""
 
-    SYSTEM_PROMPT = f"""You are a senior technical reqruiter rewriting a resume to get this
-candidate an interview for a specific job. You have the candidate's original resume and
-the job description.
+    SYSTEM_PROMPT = f"""You are a senior technical recruiter rewriting a resume to get
+this candidate an interview for a specific job. You have the candidate's original resume
+and the job description.
 
 Take the candidate's original resume and job description. Return a tailored resume as a
 JSON object. Speak clearly about what the candidate owned, not the team work. Their
 decisions, tradeoffs, and impact.
 
-## RECREUITER SCAN (6 seconds):
+## RECRUITER SCAN (6 seconds):
 1. Title -- matches what they are hiring?
-2. Summary -- 2-3 sentences that summarize the candidate's experience and fit for the
+2. Summary -- 4-5 sentences that summarize the candidate's experience and fit for the
 role. This paragraph should be no more than five lines and should consisely highlight in
 third person:
 - The candidate's level of expertise
@@ -47,12 +49,17 @@ startups covering APAC region', instead of just 'operations director')
 ## TAILORING RULES:
 TITLE: Match the target role. Keep seniority (Senior/Lead/Staff). Drop company suffixes
 (e.g. 'Software Engineer II at Google' becomes 'Senior Software Engineer') and team names.
+
 SUMMARY: Rewrite from scratch. Lead with the 1-2 skills that matter most for THIS role.
 Sound like someone who's done this job.
+
 SKILLS: Reorder each category so the job's must-haves appear first.
-Reframe EVERY bullet for this role.Same real work, different angle. Every bullet must be
+Reframe EVERY bullet for this role. Same real work, different angle. Every bullet must be
 reworded. Never copy verbatim.
-PROJECTS: Reorder by relevance. Drop irrelevant projects entirely.
+
+PROJECTS: Reorder by relevance. 3-4 bullets for each project at max and 2 as minimum.
+Drop irrelevant projects entirely.
+
 BULLETS: Strong verb + what you built + quantified impact. Vary verbs (Built, Designed,
 Implemented, Reduced, Automated, Deployed, Operated, Optimized). Most relevants first.
 Max 4 per section.
@@ -72,28 +79,22 @@ decrease in errors.'
 resume content.
 - Do NOT change real numbers.
 - CAN'T be longer than two pages.
+- Don't break skill names into multiple skills. For instnce, 'Mycrosoft Excel' should not
+be split into 'Microsoft' and 'Excel'.
 
-## OUTPUT FORMAT:
-Return ONLY valid JSON. No markdown fences. No commentary. No 'here is' preamble.
-{{
-    "title": "Role Title",
-    "summary": "2-3 tailored sentences",
-    "skills": {{
-            "languages": "...",
-            "frameworks": "...",
-            "devops_and_infra": "...",
-            "tools": "..."
-        }},
-    "experience": [{{
-            "header": "Title at Company, Dates",
-            "bullets": ["Tailored bullet 1", "Tailored bullet 2"]
-        }}],
-    "projects": [{{
-            "header": "Project Name - Description",
-            "bullets": ["Tailored bullet 1", "Tailored bullet 2"]
-        }}],
-    "education": "{settings.form.school} | {settings.form.education_level}"
-}}
+## CANDIDATE'S KNOWN DETAILS:
+- Current title: {settings.form.current_title}
+- Programming languages: {', '.join(settings.form.programming_languages)}
+- Frameworks: {', '.join(settings.form.frameworks)}
+- Tools: {', '.join(settings.form.tools)}
+- Additional details provided by the candidate: {settings.form.about or 'N/A'}
+
+ONLY use any of the candidate's known details if they are not in the original resume but
+are relevant for the target job. For instance, if the candidate's original resume doesn't
+mention 'Python' but the candidate knows Python and the target job requires Python, you
+can add 'Python' to the skills section. But if the original resume already mentions
+'Python', you should not add it again or emphasize it more just because the candidate
+knows Python.
 """
 
     return SYSTEM_PROMPT
@@ -133,8 +134,16 @@ or projects that can't be traced back to something in the original resume).
 6. Referring to the candidate by their name or using personal pronouns like 'I' or 'my',
 as the original resume is anonymized:
     - BAD: 'John is a senior software engineer with experience in Python and AWS'. This
-    gives the impression that someone wrote the resume.
+    gives the impression that someone wrote the resume for you.
     - GOOD: 'Senior software engineer with experience in Python and AWS'.
+7. A Skill that appear multiple times in the Skills section is a sign of allucination
+and should be flagged as fabrication. For instance, if 'Python' appears 3 times in the
+Skills section, but the original resume only mentioned 'Python' once in the Skills
+section, this is a sign of fabrication.
+8. Skills can't be split into multiple skills. For instance, 'Microsoft Excel' should not
+be split into 'Microsoft' and 'Excel'. If the original resume had 'Microsoft Excel' as a
+skill, but the taylored resume has 'Microsoft' and 'Excel' as two separate skills, this is
+a sign of fabrication.
 
 ## WHAT IS NOT FABRICATION (OK for these):
 1. Rewording bullets to better match the job description as long as the underlying is real
@@ -156,6 +165,13 @@ STRETCH, not a fabrication.
 - Only FAIL if there are MAJOR lies: completely invented projects, fake companies,
 fake education, wildly inflated numbers, or invented metrics or invented skills that are
 not closely related to anything in the original resume.
+
+## CANDIDATE'S KNOWN DETAILS:
+- Current title: {settings.form.current_title}
+- Programming languages: {', '.join(settings.form.programming_languages)}
+- Frameworks: {', '.join(settings.form.frameworks)}
+- Tools: {', '.join(settings.form.tools)}
+- Additional details provided by the candidate: {settings.form.about or 'N/A'}
 
 Be strict about major lies. Be lenient about minor stretches and learnable skills.
 Do not fail for style, tone, or restructuring changes. Your job is to catch FABRICATION,
@@ -180,13 +196,69 @@ async def validate_taylored_resume(
         of error messages.
     """
 
+    is_valid = True
+    errors = []
+
+    # validate languages are not duplicated
+    languages = {}
+    for lang in taylored.skills.languages.split(","):
+        lang = lang.strip()
+        languages[lang] = languages.get(lang, 0) + 1
+    for lang, count in languages.items():
+        if count > 1:
+            is_valid = False
+            errors.append(f"Language '{lang}' appears {count} times in skills")
+        matches = re.findall(r"\b" + re.escape(lang) + r"\b", taylored.skills.languages)
+        if len(matches) > 1:
+            is_valid = False
+            msg = f"Language '{lang}' appears {len(matches)} times in skills as: "
+            msg += f" {', '.join(matches)}"
+            errors.append(msg)
+
+    # validate frameworks are not duplicated
+    frameworks = {}
+    for fw in taylored.skills.frameworks.split(","):
+        fw = fw.strip()
+        frameworks[fw] = frameworks.get(fw, 0) + 1
+    for fw, count in frameworks.items():
+        if count > 1:
+            is_valid = False
+            errors.append(f"Framework '{fw}' appears {count} times in skills")
+        matches = re.findall(r"\b" + re.escape(fw) + r"\b", taylored.skills.frameworks)
+        if len(matches) > 1:
+            is_valid = False
+            msg = f"Framework '{fw}' appears {len(matches)} times in skills as: "
+            msg += f" {', '.join(matches)}"
+            errors.append(msg)
+
+    # validate tools are not duplicated
+    tools = {}
+    for tool in taylored.skills.tools.split(","):
+        tool = tool.strip()
+        tools[tool] = tools.get(tool, 0) + 1
+    for tool, count in tools.items():
+        if count > 1:
+            is_valid = False
+            errors.append(f"Tool '{tool}' appears {count} times in skills")
+        matches = re.findall(r"\b" + re.escape(tool) + r"\b", taylored.skills.tools)
+        if len(matches) > 1:
+            is_valid = False
+            msg = f"Tool '{tool}' appears {len(matches)} times in skills as: "
+            msg += f" {', '.join(matches)}"
+            errors.append(msg)
+
     original_resume = load_resume()
     taylored_resume = f"TITLE: {taylored.title}\n"
     taylored_resume += f"SUMMARY: {taylored.summary}\n"
-    taylored_resume += f"SKILLS: {taylored.skills}\n"
-    taylored_resume += f"EXPERIENCE: {taylored.experience}\n"
-    taylored_resume += f"PROJECTS: {taylored.projects}\n"
-    taylored_resume += f"EDUCATION: {taylored.education}"
+    taylored_resume += f"SKILLS: {taylored.skills.model_dump_json()}\n"
+    taylored_resume += "EXPERIENCE: "
+    taylored_resume += json.dumps([e.model_dump() for e in taylored.experience])
+    taylored_resume += "\n"
+    taylored_resume += "PROJECTS: "
+    taylored_resume += json.dumps([p.model_dump() for p in taylored.projects])
+    taylored_resume += "\n"
+    taylored_resume += "EDUCATION: "
+    taylored_resume += json.dumps([e.model_dump() for e in taylored.education])
 
     prompt = f"JOB TITLE: {job.title}\n"
     prompt += f"JOB DESCRIPTION: {job.description}\n\n"
@@ -213,10 +285,11 @@ async def validate_taylored_resume(
             handle_rate_limit_error(exc)
             break
 
-    if result:
-        return result.is_valid, result.errors
+    if result and is_valid is not False:
+        is_valid = result.is_valid
+    errors.extend(result.errors)
 
-    return False, []
+    return is_valid, errors
 
 
 async def taylor_resume(job: JobPost) -> str:
@@ -253,7 +326,6 @@ async def taylor_resume(job: JobPost) -> str:
     taylor_prompt += f"COMPANY: {job.company}\n"
     taylor_prompt += f"LOCATION: {job.location}\n"
     taylor_prompt += f"DESCRIPTION: {job.description or 'N/A'}\n\n"
-    taylor_prompt += "Return the JSON"
 
     taylored = None
     is_valid = False
@@ -277,6 +349,9 @@ async def taylor_resume(job: JobPost) -> str:
         except RateLimitError as exc:
             handle_rate_limit_error(exc)
             break
+        except APIConnectionError:
+            logger.error("Cannot connect to LLM endpoint.")
+            break
 
         is_valid, errors = await validate_taylored_resume(job, taylored, settings)
         if is_valid:
@@ -296,8 +371,8 @@ async def taylor_resume(job: JobPost) -> str:
     resume_dir = Path(config.resumes_dir)
     file_title = re.sub(r"[^\w\s-]", "", job.title).strip()[:50].replace(" ", "_")
     company = re.sub(r"[^\w\s-]", "", job.company or "").strip()[:50].replace(" ", "_")
-    random_suffix = os.urandom(4).hex()
-    file_title = f"{file_title}_{company}_{random_suffix}.pdf"
+    timestamp = datetime.now(UTC).strftime("%Y%m%d%H%M%S")
+    file_title = f"{file_title}_{company}_{timestamp}.pdf"
     resume_path = resume_dir / file_title
 
     generated = await convert_to_pdf(taylored, resume_path)

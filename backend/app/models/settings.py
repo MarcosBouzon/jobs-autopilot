@@ -33,6 +33,7 @@ class Form(BaseModel):
     country: str = ""
     zip_code: str = ""
     linkedin_url: str = ""
+    github_url: str = ""
     website_url: str = ""
     portfolio_url: str = ""
     legally_authorized: str = ""

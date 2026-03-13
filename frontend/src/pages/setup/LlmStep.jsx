@@ -87,6 +87,7 @@ function LlmStep({ onBack, resumeFileRef }) {
         country: setup.details.country.trim(),
         zip_code: setup.details.zip_code.trim(),
         linkedin_url: setup.details.linkedin_url.trim(),
+        github_url: setup.details.github_url.trim(),
         website_url: setup.details.website_url.trim(),
         portfolio_url: setup.details.portfolio_url.trim(),
         legally_authorized: setup.work.legally_authorized,

@@ -108,7 +108,10 @@ def build_agent(
         return agent
 
     if settings.config.local_llm_path and settings.config.local_llm_model:
-        client = AsyncOpenAI(base_url=settings.config.local_llm_path, api_key="local")
+        base_url = settings.config.local_llm_path
+        if not Path("/.dockerenv").exists():
+            base_url = base_url.replace("host.docker.internal", "localhost")
+        client = AsyncOpenAI(base_url=base_url, api_key="local")
         model = OpenAIChatCompletionsModel(
             model=settings.config.local_llm_model, openai_client=client
         )
@@ -139,19 +142,19 @@ async def convert_to_pdf(resume: TayloredResume, output_path: Path) -> bool:
 
     contact_parts = []
     if form.phone:
-        contact_parts.append(f"Phone: {form.phone}")
+        contact_parts.append(f"<strong>Phone:</strong> {form.phone}")
     if form.email:
-        contact_parts.append(f"Email: {form.email}")
+        contact_parts.append(f"<strong>Email:</strong> {form.email}")
     contact_line1 = " | ".join(contact_parts)
 
     link_parts = []
     if form.linkedin_url:
         link_parts.append(
-            f'LinkedIn: <a href="{form.linkedin_url}">{form.linkedin_url}</a>'
+            f'<strong>LinkedIn:</strong> <a href="{form.linkedin_url}">{form.linkedin_url}</a>'
         )
-    if form.website_url:
+    if form.github_url:
         link_parts.append(
-            f'GitHub: <a href="{form.website_url}">{form.website_url}</a>'
+            f'<strong>GitHub:</strong> <a href="{form.github_url}">{form.github_url}</a>'
         )
     contact_line2 = " | ".join(link_parts)
 
@@ -164,7 +167,7 @@ async def convert_to_pdf(resume: TayloredResume, output_path: Path) -> bool:
 
     summary_html = (
         '<div class="section">'
-        '<div class="section-title">Profile</div>'
+        '<div class="section-title"><span class="material-symbols-outlined">contacts_product</span>Profile</div>'
         f'<div class="summary">{resume.summary}</div>'
         "</div>"
     )
@@ -184,21 +187,86 @@ async def convert_to_pdf(resume: TayloredResume, output_path: Path) -> bool:
         cells = "".join(f"<span>{skill}</span>" for skill in all_skills)
         skills_html = (
             '<div class="section">'
-            '<div class="section-title">Skills</div>'
+            '<div class="section-title"><span class="material-symbols-outlined">graphic_eq</span>Skills</div>'
             f'<div class="skills-grid">{cells}</div>'
             "</div>"
         )
 
-    exp_html = ""
+    exp_items = ""
     for exp in resume.experience:
         bullets = "".join(f"<li>{b}</li>" for b in exp.bullets)
-        exp_html += f'<div class="entry"><div class="entry-title">{exp.header}</div><ul>{bullets}</ul></div>\n'
+        exp_items += (
+            f'<div class="entry">'
+            f'<div class="entry-grid">'
+            f'<div class="entry-left">'
+            f'<div>{exp.date_range}</div>'
+            f'<div>{exp.location}</div>'
+            f"</div>"
+            f'<div class="entry-right">'
+            f'<div class="entry-title">{exp.title}</div>'
+            f'<div class="entry-company">{exp.company}</div>'
+            f"<ul>{bullets}</ul>"
+            f"</div>"
+            f"</div>"
+            f"</div>\n"
+        )
+    exp_html = ""
+    if exp_items:
+        exp_html = (
+            '<div class="section">'
+            '<div class="section-title"><span class="material-symbols-outlined">work</span>Work Experience</div>'
+            f"{exp_items}"
+            "</div>"
+        )
+
+    proj_items = ""
+    for proj in resume.projects:
+        bullets = "".join(f"<li>{b}</li>" for b in proj.bullets)
+        proj_items += (
+            f'<div class="project">'
+            f'<div class="project-header">{proj.header}</div>'
+            f"<ul>{bullets}</ul>"
+            f"</div>\n"
+        )
+    proj_html = ""
+    if proj_items:
+        proj_html = (
+            '<div class="section">'
+            '<div class="section-title"><span class="material-symbols-outlined">bookmark_check</span>Relevant Projects</div>'
+            f"{proj_items}"
+            "</div>"
+        )
+
+    edu_items = ""
+    for edu in resume.education:
+        edu_items += (
+            f'<div class="entry">'
+            f'<div class="entry-grid">'
+            f'<div class="entry-left">'
+            f"<div>{edu.date_range}</div>"
+            f"</div>"
+            f'<div class="entry-right">'
+            f'<div class="edu-school">{edu.school}</div>'
+            f'<div class="edu-degree">{edu.description}</div>'
+            f"</div>"
+            f"</div>"
+            f"</div>\n"
+        )
+    edu_html = ""
+    if edu_items:
+        edu_html = (
+            '<div class="section">'
+            '<div class="section-title"><span class="material-symbols-outlined">school</span>Education</div>'
+            f"{edu_items}"
+            "</div>"
+        )
 
     html_content = f"""
         <!DOCTYPE html>
         <html lang="en">
             <head>
                 <meta charset="UTF-8">
+                <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=bookmark_check,contacts_product,graphic_eq,school,work" />
                 <style>{RESUME_CSS}</style>
             </head>
             <body>
@@ -208,6 +276,8 @@ async def convert_to_pdf(resume: TayloredResume, output_path: Path) -> bool:
                 {summary_html}
                 {skills_html}
                 {exp_html}
+                {proj_html}
+                {edu_html}
             </body>
         </html>
     """
@@ -218,6 +288,7 @@ async def convert_to_pdf(resume: TayloredResume, output_path: Path) -> bool:
         browser = await p.chromium.launch()
         page = await browser.new_page()
         await page.set_content(html_content)
+        await page.wait_for_load_state("networkidle")
         await page.pdf(
             path=str(output_path),
             format="Letter",
