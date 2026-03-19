@@ -6,6 +6,7 @@ from pydantic import BaseModel
 
 
 class Config(BaseModel):
+    auto_apply: bool = False
     openai_api_key: str = ""
     gemini_api_key: str = ""
     claude_api_key: str = ""

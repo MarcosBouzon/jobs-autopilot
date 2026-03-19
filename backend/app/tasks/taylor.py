@@ -70,7 +70,7 @@ def taylor_resumes() -> dict[str, object]:  # type: ignore[type-arg]
             logger.info("Dispatching taylor tasks for %d jobs", len(jobs))
 
             for job in jobs[:10]:
-                # taylor.delay(job=job)
-                await _taylor(job)
+                taylor.delay(job=job)
+                # await _taylor(job)
 
         return asyncio.run(_run())

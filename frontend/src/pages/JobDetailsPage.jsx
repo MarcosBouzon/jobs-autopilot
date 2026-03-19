@@ -71,7 +71,7 @@ function JobDetailsPage() {
               <Button
                 variant="contained"
                 color="primary"
-                onClick={() => applyJob(job._id)}
+                onClick={() => applyJob({ id: job._id })}
               >
                 Apply
               </Button>
@@ -80,6 +80,7 @@ function JobDetailsPage() {
                 href={job.url}
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={() => applyJob({ id: job._id, manual: true })}
               >
                 Manual Apply
               </Button>

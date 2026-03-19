@@ -37,8 +37,11 @@ export const api = createApi({
     }),
 
     applyJob: builder.mutation({
-      query: (id) => ({ url: `apply/${id}/`, method: "POST" }),
-      invalidatesTags: (_result, _error, id) => [
+      query: ({ id, manual = false }) => ({
+        url: manual ? `apply/${id}/?manual=true` : `apply/${id}/`,
+        method: "POST",
+      }),
+      invalidatesTags: (_result, _error, { id }) => [
         { type: "Job", id },
         { type: "Job", id: "LIST" },
       ],

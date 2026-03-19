@@ -59,7 +59,7 @@ reworded. Never copy verbatim.
 
 WORK EXPERIENCE: Up to last 3 roles if there are more than 3 roles in the original resume.
 
-PROJECTS: Reorder by relevance. 3-4 bullets for each project at max and 2 as min
+PROJECTS: Reorder by relevance. 3-4 bullets for each project at max and 3 as min
 (ENFORCED). Drop irrelevant projects entirely.
 
 BULLETS: Strong verb + what you built + quantified impact. Vary verbs (Built, Designed,
@@ -207,11 +207,16 @@ async def validate_taylored_resume(
     is_valid = True
     errors = []
 
-    # validate languages are not duplicated
+    # validate languages are not duplicated or fabricated
     languages = {}
     for lang in taylored.skills.languages.split(","):
         lang = lang.strip()
         languages[lang] = languages.get(lang, 0) + 1
+    for lang in languages:
+        if lang not in settings.form.programming_languages:
+            is_valid = False
+            msg = f"Language '{lang}' is not in candidate's known programming languages"
+            errors.append(msg)
     for lang, count in languages.items():
         if count > 1:
             is_valid = False

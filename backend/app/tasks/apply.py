@@ -58,6 +58,11 @@ def apply_jobs() -> dict[str, object]:  # type: ignore[type-arg]
             settings = Settings.model_validate(doc)
             min_score: float = 0.0
 
+            if not settings.config.auto_apply:
+                msg = "Auto-apply is disabled in settings, skipping apply_jobs task"
+                logger.info(msg)
+                return {"status": "skipped"}
+
             if settings:
                 min_score = float(settings.config.min_score)
 
@@ -76,15 +81,16 @@ def apply_jobs() -> dict[str, object]:  # type: ignore[type-arg]
             for job in jobs:
                 apply_job.delay(job=job)
 
-        asyncio.run(_run())
+        result = asyncio.run(_run())
 
-        publish_message(
-            "reload",
-            {
-                "title": "Applied Jobs",
-                "message": "Newly applied jobs are available for review.",
-                "success": True,
-            },
-        )
-        
+        if result.get("status") != "skipped":
+            publish_message(
+                "reload",
+                {
+                    "title": "Applied Jobs",
+                    "message": "Newly applied jobs are available for review.",
+                    "success": True,
+                },
+            )
+
         return {"status": "dispatched"}
