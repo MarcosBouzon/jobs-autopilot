@@ -78,7 +78,8 @@ function ProfileStep({ onBack, onNext, resumeFileRef }) {
         onChange={(e) => dispatch(updateProfile({ aboutMe: e.target.value }))}
         fullWidth
         multiline
-        rows={4}
+        minRows={4}
+        maxRows={20}
         placeholder="Any extra information you'd like the autopilot to know about you — skills, preferences, experience highlights..."
         slotProps={{ inputLabel: { shrink: true } }}
         sx={{ mb: 3 }}

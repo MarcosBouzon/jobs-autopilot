@@ -88,6 +88,16 @@ function JobDetailsPage() {
         </Stack>
       </Box>
       <Divider sx={{ mb: 3 }} />
+      {job.reasoning && (
+        <Paper sx={{ p: 3, mb: 3, bgcolor: "action.hover" }}>
+          <Typography variant="h6" sx={{ mb: 1 }}>
+            Score Reason
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            {job.reasoning}
+          </Typography>
+        </Paper>
+      )}
       <Paper sx={{ p: 3 }}>
         <Typography variant="h6" sx={{ mb: 2 }}>
           Job Description

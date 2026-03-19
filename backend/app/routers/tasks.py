@@ -1,11 +1,13 @@
+from datetime import UTC, datetime
 from pathlib import Path
 
 from bson import ObjectId
 from bson.errors import InvalidId
-from fastapi import APIRouter, File, HTTPException, UploadFile, status
+from fastapi import APIRouter, File, HTTPException, Query, UploadFile, status
 
 from app.config import config
 from app.database import DB
+from app.models.job import JobPost
 from app.tasks.apply import apply_job
 from app.tasks.score import score_job
 
@@ -25,7 +27,7 @@ def _parse_object_id(jid: str) -> ObjectId:
 
 
 @router.post("/score/{jid}/")
-async def initiate_score(jid: str, db: DB) -> dict[str, str]:
+async def score(jid: str, db: DB) -> dict[str, str]:
     """Dispatch a Celery score task for the given job ID."""
 
     oid = _parse_object_id(jid)
@@ -41,16 +43,25 @@ async def initiate_score(jid: str, db: DB) -> dict[str, str]:
 
 
 @router.post("/apply/{jid}/")
-async def initiate_apply(jid: str, db: DB) -> dict[str, str]:
-    """Dispatch a Celery apply task for the given job ID."""
+async def apply(
+    jid: str, db: DB, manual: bool = Query(default=False)
+) -> dict[str, str]:
+    """Dispatch a Celery apply task or mark job as manually applied."""
 
     oid = _parse_object_id(jid)
-    job = await db.jobs.find_one({"_id": oid})
+    job: JobPost = await db.jobs.find_one({"_id": oid})
 
     if job is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Job not found"
         )
+
+    if manual:
+        await db.jobs.update_one(
+            {"_id": oid},
+            {"$set": {"applied": True, "applied_date": datetime.now(UTC)}}
+        )
+        return {"task_id": "manual"}
 
     task = apply_job.delay(job=job)
 

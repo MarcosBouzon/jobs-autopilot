@@ -17,7 +17,7 @@ async def _taylor(job: dict) -> dict[str, str]:
 
     result = await taylor_resume(job_post)
     if result is None:
-        return {"status": "no_llm", "job_id": job_post.id or ""}
+        return {"status": "no_llm", "job_id": job_post.id, "title": job_post.title}
 
     # db = get_task_db()
     # await db.jobs.update_one(
@@ -25,7 +25,7 @@ async def _taylor(job: dict) -> dict[str, str]:
     #     {"$set": {"resume_path": result.get("resume_path", "")}},
     # )
 
-    return {"status": "done", "job_id": job_post.id or ""}
+    return {"status": "done", "job_id": job_post.id, "title": job_post.title}
 
 
 @celery.task
@@ -70,7 +70,7 @@ def taylor_resumes() -> dict[str, object]:  # type: ignore[type-arg]
             logger.info("Dispatching taylor tasks for %d jobs", len(jobs))
 
             for job in jobs[:10]:
-                taylor.delay(job=job)
-                # await _taylor(job)
+                # taylor.delay(job=job)
+                await _taylor(job)
 
         return asyncio.run(_run())

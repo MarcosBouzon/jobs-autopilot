@@ -59,8 +59,8 @@ reworded. Never copy verbatim.
 
 WORK EXPERIENCE: Up to last 3 roles if there are more than 3 roles in the original resume.
 
-PROJECTS: Reorder by relevance. 3-4 bullets for each project at max and 2 as minimum.
-Drop irrelevant projects entirely.
+PROJECTS: Reorder by relevance. 3-4 bullets for each project at max and 2 as min
+(ENFORCED). Drop irrelevant projects entirely.
 
 BULLETS: Strong verb + what you built + quantified impact. Vary verbs (Built, Designed,
 Implemented, Reduced, Automated, Deployed, Operated, Optimized). Most relevants first.
@@ -129,8 +129,12 @@ like a real person.
 
 ## WHAT IS FABRICATION (FAIL for these):
 1. Adding tools, programming languages, or frameworks to TECHNICAL SKILLS that are not in
-the original resume. Known skills: {', '.join(known_skills)}.
-2. Inventing new metrics or numbers that were not in the original resume.
+the original resume nor in the candidate's known skills.
+Known skills: {', '.join(known_skills)}.
+2. Inventing new metrics or numbers that were not in the original resume. For instance,
+if the taylored resume says 'reduced reporting time by 90%', or 'increased revenue by
+50%', and there is no mention of this in the original resume, this is a sign of
+fabrication.
 3. Inventing work that has no basis in any original bullet (completely new achievements
 or projects that can't be traced back to something in the original resume).
 4. Adding companies, degrees or certifications that are not in the original resume.
@@ -159,8 +163,8 @@ job
 5. Reordering anything
 6. Changing the title or summary completely to better match the target job
 
-## TOLERANCE RULES:
-The goal is to get interviews, not to be a perfect fact-checker. Allow up to 3 minor
+## TOLERANCE RULES (KEEP IN MIND THE GOAL):
+The goal is to get interviews, NOT to be a perfect fact-checker. ALLOW up to 3 minor
 stretches per resume:
 - Adding a closely related tool that the candidate could realistically know is a MINOR
 STRETCH, not a fabrication.
@@ -275,6 +279,7 @@ async def validate_taylored_resume(
         sys_prompt=judge_prompt,
         output_type=JudgeVeredict,
         settings=settings,
+        model_override="openai/gpt-4.1-mini",
     )
 
     result = None
@@ -292,6 +297,10 @@ async def validate_taylored_resume(
     if result and is_valid is not False:
         is_valid = result.is_valid
     errors.extend(result.errors)
+
+    if not is_valid:
+        msg = "Taylored resume for job %s failed validation with errors: %s"
+        logger.warning(msg, job.title, "; ".join(errors))
 
     return is_valid, errors
 

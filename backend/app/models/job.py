@@ -21,6 +21,7 @@ class JobPost(BaseModel):
     job_board: str
     score: float = 0.0
     applied: bool = False
+    applied_date: datetime | None = None
     url: str
     keywords: list[str] = []
     reasoning: str = ""
@@ -50,3 +51,4 @@ class JobPostCreate(BaseModel):
     reasoning: str = ""
     resume_path: str = ""
     autopilot_created: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    applied_date: datetime | None = None

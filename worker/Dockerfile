@@ -8,4 +8,4 @@ RUN uv run playwright install --with-deps chromium
 
 COPY backend/app ./app
 
-CMD ["uv", "run", "watchfiles", "--filter", "python", "celery -A app.celery_app worker --loglevel=info", "app"]
+CMD ["uv", "run", "watchfiles", "--filter", "python", "celery -A app.celery_app worker --concurrency=4 --loglevel=info", "app"]

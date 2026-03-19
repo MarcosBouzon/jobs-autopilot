@@ -14,9 +14,9 @@ from app.tasks.utils import get_task_db
 
 logger = logging.getLogger(__name__)
 
-SCORE_PROMPT = """You are a job fit evaluator. Given a candidate's resume, additional
-details provided by the client, and a job description, score how well the candidate fits
-the role on a scale of 0 to 10.
+SCORE_PROMPT = """You are a job fit evaluator. Given a candidate's resume, known skills,
+aditional details provided by the client, and a job description, score how well the
+candidate fits the role on a scale of 0 to 10.
 
 CANDIDATE FACTS:
 - Assume the candidate has consulting experience.
@@ -69,8 +69,15 @@ async def score_job(job: JobPost) -> JobScore | None:
         logger.error(msg)
         return None
 
+    known_skills = set(
+        settings.form.programming_languages
+        + settings.form.frameworks
+        + settings.form.tools
+    )
+
     resume = load_resume()
     prompt = f"## Resume\n\n{resume}\n\n"
+    prompt += f"## Candidate's Known Skills\n\n{known_skills}\n\n"
     prompt += f"## Additional Details\n\n{settings.form.about}\n\n"
     prompt += f"## Job Description\n\n{job.description}"
 

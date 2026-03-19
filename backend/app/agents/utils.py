@@ -87,6 +87,7 @@ def build_agent(
     output_type: type[BaseModel],
     settings: Settings,
     temp: float = 0.2,
+    model_override: str | None = None,
 ) -> Agent[None] | None:
     """Build a scorer agent using cloud or local LLM based on settings."""
 
@@ -103,7 +104,7 @@ def build_agent(
     if cloud_model:
         for key, value in get_cloud_env(settings).items():
             os.environ[key] = value
-        agent.model = cloud_model
+        agent.model = model_override or cloud_model
 
         return agent
 

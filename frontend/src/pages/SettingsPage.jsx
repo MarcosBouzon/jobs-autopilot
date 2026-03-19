@@ -291,7 +291,8 @@ function ProfileSection({ data, updateSettings }) {
         onChange={(e) => setAbout(e.target.value)}
         fullWidth
         multiline
-        rows={4}
+        minRows={4}
+        maxRows={20}
         placeholder="Any extra information you'd like the autopilot to know about you..."
         slotProps={{ inputLabel: { shrink: true } }}
         sx={{ mb: 3 }}
