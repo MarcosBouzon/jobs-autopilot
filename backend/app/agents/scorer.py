@@ -14,9 +14,23 @@ from app.tasks.utils import get_task_db
 
 logger = logging.getLogger(__name__)
 
-SCORE_PROMPT = """You are a job fit evaluator. Given a candidate's resume, known skills,
+
+def get_scorer_prompt(settings: Settings) -> str:
+    known_skils = set(
+        settings.form.programming_languages
+        + settings.form.frameworks
+        + settings.form.tools
+    )
+
+    scorer_prompt = f"""You are a job fit evaluator. Given a candidate's resume, known skills,
 aditional details provided by the client, and a job description, score how well the
 candidate fits the role on a scale of 0 to 10.
+
+CANDIDATE KNOWN SKILLS:
+- {', '.join(known_skils)}
+
+CANDIDATE ADDITIONAL DETAILS:
+- {settings.form.about}
 
 CANDIDATE FACTS:
 - Assume the candidate has consulting experience.
@@ -39,6 +53,8 @@ INSTRUCTIONS:
 - Be objective and consistent in your scoring.
 """
 
+    return scorer_prompt
+
 
 class JobScore(BaseModel):
     """Structured output from the scoring agent."""
@@ -60,9 +76,10 @@ async def score_job(job: JobPost) -> JobScore | None:
     db = get_task_db()
     doc = await db.settings.find_one({"_id": SETTINGS_DOC_ID})
     settings = Settings.model_validate(doc) if doc else Settings()
+    sys_prompt = get_scorer_prompt(settings)
 
     agent = build_agent(
-        name="Scorer", sys_prompt=SCORE_PROMPT, output_type=JobScore, settings=settings
+        name="Scorer", sys_prompt=sys_prompt, output_type=JobScore, settings=settings
     )
     if agent is None:
         msg = "No LLM configured. Set an API key (OpenAI/Claude/Gemini) or local LLM."

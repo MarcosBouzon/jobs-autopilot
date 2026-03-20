@@ -4,6 +4,7 @@ WORKDIR /app
 
 COPY worker/pyproject.toml worker/uv.lock* ./
 RUN uv sync --frozen --no-dev
+ENV PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers
 RUN uv run playwright install --with-deps chromium
 
 RUN groupadd --gid 1000 worker && \

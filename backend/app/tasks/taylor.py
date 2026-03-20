@@ -6,7 +6,7 @@ from bson import ObjectId
 from app.agents.taylorer import taylor_resume
 from app.celery_app import celery
 from app.models.job import JobPost
-from app.tasks.utils import get_task_db, publish_message, task_lock
+from app.tasks.utils import get_task_db, task_lock
 
 logger = logging.getLogger(__name__)
 
@@ -15,15 +15,13 @@ async def _taylor(job: dict) -> dict[str, str]:
     job_post = JobPost.model_validate(job)
     logger.info("Tayloring resume for job %s", job_post.title)
 
-    result = await taylor_resume(job_post)
-    if result is None:
-        return {"status": "no_llm", "job_id": job_post.id, "title": job_post.title}
+    resume_path = await taylor_resume(job_post)
 
-    # db = get_task_db()
-    # await db.jobs.update_one(
-    #     {"_id": ObjectId(job_post.id)},
-    #     {"$set": {"resume_path": result.get("resume_path", "")}},
-    # )
+    db = get_task_db()
+    await db.jobs.update_one(
+        {"_id": ObjectId(job_post.id)},
+        {"$set": {"resume_path": resume_path}},
+    )
 
     return {"status": "done", "job_id": job_post.id, "title": job_post.title}
 

@@ -23,13 +23,18 @@ def _parse_object_id(oid: str) -> ObjectId:
 
 
 @router.get("/jobs/", response_model=list[JobPost])
-async def list_jobs(db: DB, applied: bool | None = None) -> list[JobPost]:
-    """Return all job postings, optionally filtered by applied status."""
+async def list_jobs(
+    db: DB, applied: bool | None = None, search: str | None = None
+) -> list[JobPost]:
+    """Return all job postings, optionally filtered by applied status and title."""
 
     query: dict[str, Any] = {"deleted": {"$ne": True}}
 
     if applied is not None:
         query["applied"] = applied
+    if search:
+        pattern = {"$regex": search, "$options": "i"}
+        query["$or"] = [{"title": pattern}, {"company": pattern}]
     docs = await db.jobs.find(query).sort("autopilot_created", -1).to_list(length=None)
 
     return [JobPost.model_validate(doc) for doc in docs]

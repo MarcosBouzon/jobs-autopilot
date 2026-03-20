@@ -10,13 +10,15 @@ import CircularProgress from "@mui/material/CircularProgress";
 import Alert from "@mui/material/Alert";
 import Tooltip from "@mui/material/Tooltip";
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
-import { useGetJobQuery, useApplyJobMutation } from "../store/apiSlice.js";
+import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
+import { useGetJobQuery, useApplyJobMutation, useDeleteJobMutation } from "../store/apiSlice.js";
 
 function JobDetailsPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { data: job, isLoading, error } = useGetJobQuery(id);
   const [applyJob] = useApplyJobMutation();
+  const [deleteJob] = useDeleteJobMutation();
 
   if (isLoading) {
     return (
@@ -99,6 +101,16 @@ function JobDetailsPage() {
               </Button>
             </>
           )}
+          <Tooltip title="Delete">
+            <Button
+              variant="contained"
+              color="error"
+              onClick={() => deleteJob(job._id).then(() => navigate("/"))}
+              sx={{ minWidth: "auto", px: 1 }}
+            >
+              <DeleteOutlinedIcon />
+            </Button>
+          </Tooltip>
         </Stack>
       </Box>
       <Divider sx={{ mb: 3 }} />

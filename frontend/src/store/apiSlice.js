@@ -6,9 +6,10 @@ export const api = createApi({
   tagTypes: ["Job", "Settings"],
   endpoints: (builder) => ({
     getJobs: builder.query({
-      query: (applied) => {
+      query: ({ applied, search } = {}) => {
         const params = new URLSearchParams();
         if (applied !== undefined) params.set("applied", applied);
+        if (search) params.set("search", search);
         const qs = params.toString();
         return qs ? `jobs/?${qs}` : "jobs/";
       },
