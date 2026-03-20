@@ -28,6 +28,7 @@ class JobPost(BaseModel):
     resume_path: str = ""
     autopilot_created: datetime = Field(default_factory=lambda: datetime.now(UTC))
     deleted: bool = False
+    job_hash: str | None = None
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -53,3 +54,4 @@ class JobPostCreate(BaseModel):
     resume_path: str = ""
     autopilot_created: datetime = Field(default_factory=lambda: datetime.now(UTC))
     applied_date: datetime | None = None
+    job_hash: str | None = None

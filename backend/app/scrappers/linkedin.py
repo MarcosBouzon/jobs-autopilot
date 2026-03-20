@@ -1,3 +1,4 @@
+import hashlib
 import json
 import logging
 import re
@@ -177,16 +178,25 @@ class LinkedIn(Scrapper):
                 description = response_dict.get("description", {}).get("text", "")
                 salary = get_salary_from_description(description)
 
+            title = response_dict.get("title")
+            location = response_dict.get("formattedLocation")
+
+            job_hash = None
+            if all((title, location, company, salary)):
+                raw = f"{title}|{location}|{company}|{salary}".lower()
+                job_hash = hashlib.sha256(raw.encode()).hexdigest()
+
             return {
                 "job_id": job_id,
-                "title": response_dict.get("title"),
+                "title": title,
                 "description": response_dict.get("description").get("text"),
-                "location": response_dict.get("formattedLocation"),
+                "location": location,
                 "salary": salary,
                 "company": company,
                 "job_board": "LinkedIn",
                 "url": f"https://www.linkedin.com/jobs/view/{int(job_id)}/",
                 "applies": response_dict.get("applies"),
+                "job_hash": job_hash,
             }
 
     async def fetch_jobs(self) -> list[JobPost]:
@@ -222,6 +232,7 @@ class LinkedIn(Scrapper):
                 continue
 
             job_post = JobPost.model_validate(job_details)
+            
             try:
                 await db.jobs.insert_one(job_post.model_dump(exclude={"id"}))
                 self.logger.info("Saved job: %s", job_post.title)

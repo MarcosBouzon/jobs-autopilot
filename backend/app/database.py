@@ -17,6 +17,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     _client = AsyncIOMotorClient(config.mongo_url)
     db = _client[config.mongo_db]
     await db.jobs.create_index("url", unique=True)
+    await db.jobs.create_index("job_hash", unique=True, sparse=True)
     yield
     _client.close()
 
