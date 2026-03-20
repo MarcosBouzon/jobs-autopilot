@@ -330,6 +330,7 @@ async def taylor_resume(job: JobPost) -> str:
         sys_prompt=sys_prompt,
         output_type=TayloredResume,
         settings=settings,
+        model_override="openai/gpt-4.1-mini",
     )
     if agent is None:
         msg = "No LLM configured. Set an API key (OpenAI/Claude/Gemini) or local LLM."

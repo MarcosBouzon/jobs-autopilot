@@ -39,8 +39,11 @@ def fetch_jobs_for_board(board: str) -> dict:
             }
 
         jobs = await job_board.fetch_jobs()
-        logger.info("Fetched %d jobs from %s", len(jobs), board.capitalize())
+        if not jobs:
+            logger.warning("No jobs returned from %s", board.capitalize())
+            return {"status": "done", "jobs": []}
 
+        logger.info("Fetched %d jobs from %s", len(jobs), board.capitalize())
         return {"status": "done", "jobs": jobs}
 
     return asyncio.run(_run())

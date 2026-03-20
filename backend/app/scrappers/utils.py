@@ -24,18 +24,31 @@ def is_match(job_description) -> bool:
     return match
 
 
-def get_salary_from_description(job_description) -> str:
-    """Parse the job description looking possible salary.
+def get_salary_from_description(job_description: str) -> str:
+    """Extract salary information from a job description.
+
+    Prioritizes salary ranges (e.g. "$100,000 - $150,000") over single
+    amounts to avoid false positives like "$17.2 billion".
 
     Args:
-        job_description (object): Description of a given job.
+        job_description: Full text of a job description.
 
     Returns:
-        str: String representing the job's salary if any.
+        Salary string if found, empty string otherwise.
     """
 
-    pattern = re.compile(r"\$\s?\d+[\W|\s]?[\w|\d]+[\W?][\w]*[^\W]")
-    matches = re.findall(pattern, job_description)
+    amount = r"\$\s?\d[\d,]*(?:\.\d+)?(?:\s*[kK])?"
+    range_pattern = re.compile(
+        rf"{amount}\s*[-–—]\s*\$?\s?\d[\d,]*(?:\.\d+)?(?:\s*[kK])?"
+    )
+    matches = re.findall(range_pattern, job_description)
+    if matches:
+        return " - ".join(matches)
+
+    single_pattern = re.compile(
+        rf"{amount}\s*(?:per\s+(?:year|hour)|/\s*(?:yr|hr|year|hour)|annually)"
+    )
+    matches = re.findall(single_pattern, job_description)
     if matches:
         return " - ".join(matches)
 

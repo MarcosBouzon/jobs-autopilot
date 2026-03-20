@@ -176,7 +176,6 @@ class LinkedIn(Scrapper):
                 self.logger.info("Failed to get salary info from job id: %s", job_id)
                 description = response_dict.get("description", {}).get("text", "")
                 salary = get_salary_from_description(description)
-                salary = ""
 
             return {
                 "job_id": job_id,

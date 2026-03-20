@@ -6,6 +6,12 @@ COPY worker/pyproject.toml worker/uv.lock* ./
 RUN uv sync --frozen --no-dev
 RUN uv run playwright install --with-deps chromium
 
+RUN groupadd --gid 1000 worker && \
+    useradd --uid 1000 --gid worker --create-home --shell /bin/bash worker && \
+    chown -R worker:worker /app
+
 COPY backend/app ./app
+
+USER worker
 
 CMD ["uv", "run", "watchfiles", "--filter", "python", "celery -A app.celery_app worker --concurrency=4 --loglevel=info", "app"]

@@ -8,6 +8,8 @@ import Stack from "@mui/material/Stack";
 import Divider from "@mui/material/Divider";
 import CircularProgress from "@mui/material/CircularProgress";
 import Alert from "@mui/material/Alert";
+import Tooltip from "@mui/material/Tooltip";
+import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import { useGetJobQuery, useApplyJobMutation } from "../store/apiSlice.js";
 
 function JobDetailsPage() {
@@ -58,6 +60,11 @@ function JobDetailsPage() {
             <Typography color="text.secondary">
               Score: {job.score}
             </Typography>
+            {job.resume_path && (
+              <Tooltip title="Tailored resume generated">
+                <DescriptionOutlinedIcon fontSize="small" color="success" />
+              </Tooltip>
+            )}
             <Chip
               label={job.applied ? "Applied" : "Not Applied"}
               color={job.applied ? "success" : "default"}
