@@ -42,5 +42,9 @@ celery.conf.update(
             "task": "app.tasks.cleanup.cleanup_old_jobs",
             "schedule": crontab(minute=0),  # every hour
         },
+        "delete-old-jobs": {
+            "task": "app.tasks.cleanup.delete_old_jobs",
+            "schedule": crontab(minute=0, hour=0),  # daily at midnight
+        },
     },
 )

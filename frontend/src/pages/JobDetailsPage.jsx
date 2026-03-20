@@ -65,7 +65,7 @@ function JobDetailsPage() {
             />
           </Stack>
         </Box>
-        <Stack direction="row" spacing={1}>
+        <Stack direction="row" spacing={1} sx={{ flexShrink: 0, whiteSpace: "nowrap" }}>
           {!job.applied && (
             <>
               <Button
@@ -80,9 +80,15 @@ function JobDetailsPage() {
                 href={job.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                onClick={() => applyJob({ id: job._id, manual: true })}
               >
                 Manual Apply
+              </Button>
+              <Button
+                variant="contained"
+                color="success"
+                onClick={() => applyJob({ id: job._id, manual: true })}
+              >
+                Mark Applied
               </Button>
             </>
           )}

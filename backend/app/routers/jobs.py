@@ -26,11 +26,11 @@ def _parse_object_id(oid: str) -> ObjectId:
 async def list_jobs(db: DB, applied: bool | None = None) -> list[JobPost]:
     """Return all job postings, optionally filtered by applied status."""
 
-    query: dict[str, Any] = {}
+    query: dict[str, Any] = {"deleted": {"$ne": True}}
 
     if applied is not None:
         query["applied"] = applied
-    docs = await db.jobs.find(query).to_list(length=None)
+    docs = await db.jobs.find(query).sort("autopilot_created", -1).to_list(length=None)
 
     return [JobPost.model_validate(doc) for doc in docs]
 
@@ -52,12 +52,12 @@ async def get_job(jid: str, db: DB) -> JobPost:
 
 @router.delete("/jobs/{jid}/", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_job(jid: str, db: DB) -> None:
-    """Delete a job posting by ID."""
+    """Soft-delete a job posting by ID."""
 
     oid = _parse_object_id(jid)
-    result = await db.jobs.delete_one({"_id": oid})
+    result = await db.jobs.update_one({"_id": oid}, {"$set": {"deleted": True}})
 
-    if result.deleted_count == 0:
+    if result.matched_count == 0:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Job not found"
         )

@@ -27,6 +27,7 @@ class JobPost(BaseModel):
     reasoning: str = ""
     resume_path: str = ""
     autopilot_created: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    deleted: bool = False
 
     model_config = ConfigDict(
         populate_by_name=True,

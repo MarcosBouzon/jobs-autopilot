@@ -16,7 +16,7 @@ function getSummary(jobs) {
 }
 
 function HomePage() {
-  const { data: jobs, isLoading, error } = useGetJobsQuery();
+  const { data: jobs, isLoading, error } = useGetJobsQuery(false);
 
   if (isLoading) {
     return (
