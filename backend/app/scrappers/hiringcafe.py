@@ -193,6 +193,7 @@ class HiringCafe(Scrapper):
         description_html = job_info.get("description", "")
         description = _strip_html(description_html)
         location = processed.get("formatted_workplace_location", "")
+        location_type = processed.get("workplace_type", "")
         company = processed.get("company_name", "")
         apply_url = result.get("apply_url", "")
         job_id = result.get("id", "")
@@ -214,6 +215,7 @@ class HiringCafe(Scrapper):
             "title": title,
             "description": description,
             "location": location,
+            "location_types": [location_type] if location_type else [],
             "salary": salary,
             "company": company,
             "job_board": "HiringCafe",

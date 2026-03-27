@@ -90,10 +90,8 @@ class LinkedIn(Scrapper):
             ids = []
             jobs = response_dict.get("elements", [])
             for job in jobs:
-                card = job.get("jobCardUnion", {})
-                job_id = card.get("jobPostingCard", {}).get(
-                    "preDashNormalizedJobPostingUrn"
-                )
+                card = job.get("jobCardUnion", {}).get("jobPostingCard", {})
+                job_id = card.get("preDashNormalizedJobPostingUrn")
                 try:
                     job_id = re.findall(r"\d+", job_id)[0]
                     ids.append(job_id)
@@ -183,6 +181,22 @@ class LinkedIn(Scrapper):
             title = response_dict.get("title")
             location = response_dict.get("formattedLocation")
 
+            workplace_types = response_dict.get("workplaceTypes", [])
+            location_types = []
+            for wp in workplace_types:
+                type_number = re.findall(r"\d+", wp)[0]
+                if type_number == str(JOB_ON_SITE):
+                    location_type = "Onsite"
+                elif type_number == str(JOB_REMOTE):
+                    location_type = "Remote"
+                elif type_number == str(JOB_HYBRID):
+                    location_type = "Hybrid"
+                else:
+                    location_type = "Unknown"
+
+                location_types.append(location_type)
+
+
             job_hash = None
             if all((title, location, company, salary)):
                 raw = f"{title}|{location}|{company}|{salary}".lower()
@@ -193,6 +207,7 @@ class LinkedIn(Scrapper):
                 "title": title,
                 "description": response_dict.get("description").get("text"),
                 "location": location,
+                "location_types": location_types,
                 "salary": salary,
                 "company": company,
                 "job_board": "LinkedIn",

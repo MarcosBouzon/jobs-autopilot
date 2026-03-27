@@ -37,7 +37,14 @@ def taylor(job: dict) -> dict[str, str]:  # type: ignore[type-arg]
         Dict with task result status and job_id.
     """
 
-    return asyncio.run(_taylor(job))
+    job_id = job.get("_id", job.get("id", ""))
+
+    with task_lock(f"taylor:{job_id}") as acquired:
+        if not acquired:
+            logger.info("Taylor already running for job %s, skipping", job_id)
+            return {"status": "skipped", "job_id": job_id}
+
+        return asyncio.run(_taylor(job))
 
 
 @celery.task
@@ -69,6 +76,5 @@ def taylor_resumes() -> dict[str, object]:  # type: ignore[type-arg]
 
             for job in jobs:
                 taylor.delay(job=job)
-                # await _taylor(job)
 
         return asyncio.run(_run())

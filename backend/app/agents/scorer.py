@@ -92,6 +92,6 @@ async def score_job(job: JobPost) -> JobScore | None:
         return None
 
     prompt = f"## Job Description\n\n{job.description}"
-
     result = await Runner.run(agent, prompt)
+
     return result.final_output

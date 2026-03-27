@@ -10,6 +10,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import Alert from "@mui/material/Alert";
 import Tooltip from "@mui/material/Tooltip";
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
+import IconButton from "@mui/material/IconButton";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 import { useGetJobQuery, useApplyJobMutation, useDeleteJobMutation } from "../store/apiSlice.js";
 
@@ -56,7 +57,12 @@ function JobDetailsPage() {
         }}
       >
         <Box>
-          <Typography variant="h4">{job.title}</Typography>
+          <Stack direction="row" spacing={1} sx={{ alignItems: "center", flexWrap: "wrap" }}>
+            <Typography variant="h4">{job.title}</Typography>
+            {job.location_types?.map((type) => (
+              <Chip key={type} label={type} size="small" />
+            ))}
+          </Stack>
           <Stack direction="row" spacing={2} sx={{ mt: 1, alignItems: "center" }}>
             {job.company && (
               <Typography color="text.secondary">{job.company}</Typography>
@@ -69,8 +75,16 @@ function JobDetailsPage() {
               Score: {job.score}
             </Typography>
             {job.resume_path && (
-              <Tooltip title="Tailored resume generated">
-                <DescriptionOutlinedIcon fontSize="small" color="success" />
+              <Tooltip title="View tailored resume">
+                <IconButton
+                  size="small"
+                  color="success"
+                  href={`/api/resume/${job._id}/`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <DescriptionOutlinedIcon fontSize="small" />
+                </IconButton>
               </Tooltip>
             )}
             <Chip

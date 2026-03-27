@@ -391,8 +391,7 @@ async def taylor_resume(job: JobPost) -> str:
 
     file_title = re.sub(r"[^\w\s-]", "", job.title).strip()[:50].replace(" ", "_")
     company = re.sub(r"[^\w\s-]", "", job.company or "").strip()[:50].replace(" ", "_")
-    timestamp = datetime.now(UTC).strftime("%Y%m%d%H%M%S")
-    file_title = f"{file_title}_{company}_{timestamp}.pdf"
+    file_title = f"{file_title}_{company}_{job.id}.pdf"
 
     resume_path = resume_dir / file_title
     generated = await convert_to_pdf(taylored, resume_path)

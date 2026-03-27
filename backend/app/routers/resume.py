@@ -34,15 +34,24 @@ async def get_resume(jid: str, db: DB) -> FileResponse:
         )
 
     resume_path = doc.get("resume_path", "")
-    if not resume_path or not Path(resume_path).is_file():
+    if not resume_path:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="No taylored resume found for this job",
         )
 
-    return FileResponse(
-        resume_path, media_type="application/pdf", filename=Path(resume_path).name
-    )
+    settings_doc = await db.settings.find_one({"_id": SETTINGS_DOC_ID})
+    settings = Settings.model_validate(settings_doc) if settings_doc else Settings()
+    filename = Path(resume_path).name
+    local_path = Path(settings.config.resumes_dir) / filename
+
+    if not local_path.is_file():
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Resume file not found on disk",
+        )
+
+    return FileResponse(str(local_path), media_type="application/pdf")
 
 
 @router.post("/resume/")

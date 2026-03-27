@@ -6,6 +6,8 @@ from bson import ObjectId
 from app.agents.scorer import score_job as agent_score_job
 from app.celery_app import celery
 from app.models.job import JobPost
+from app.models.settings import SETTINGS_DOC_ID, Settings
+from app.tasks.taylor import taylor
 from app.tasks.utils import get_task_db, task_lock
 
 logger = logging.getLogger(__name__)
@@ -40,6 +42,15 @@ def score_job(job: dict) -> dict[str, str]:  # type: ignore[type-arg]
                 }
             },
         )
+
+        doc = await db.settings.find_one({"_id": SETTINGS_DOC_ID})
+        settings = Settings.model_validate(doc) if doc else Settings()
+
+        if result.score >= settings.config.min_score:
+            job_post.score = result.score
+            job_post.keywords = result.keywords
+            job_post.reasoning = result.reasoning
+            taylor.delay(job=job_post.model_dump(mode="json"))
 
         return {"status": "done", "job_id": job_post.id or ""}
 
