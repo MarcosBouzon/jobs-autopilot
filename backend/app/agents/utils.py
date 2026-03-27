@@ -12,7 +12,6 @@ from pydantic import BaseModel
 
 from app.agents.html import RESUME_CSS
 from app.agents.schema import TayloredResume
-from app.config import config
 from app.models.job import JobPost
 from app.models.settings import SETTINGS_DOC_ID, Settings
 from app.tasks.utils import get_task_db
@@ -20,10 +19,10 @@ from app.tasks.utils import get_task_db
 logger = logging.getLogger(__name__)
 
 
-def load_resume() -> str:
+def load_resume(resumes_dir: str = "resumes") -> str:
     """Extract text from the user's PDF resume."""
 
-    resume_path = Path(config.resumes_dir) / "user_resume.pdf"
+    resume_path = Path(resumes_dir) / "user_resume.pdf"
     if not resume_path.exists():
         return ""
     doc = pymupdf.open(resume_path)

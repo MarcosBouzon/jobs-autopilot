@@ -1,0 +1,203 @@
+{
+  "locations": [
+    {
+      "formatted_address": "United States",
+      "types": [
+        "country"
+      ],
+      "geometry": {
+        "location": {
+          "lat": "25.7701",
+          "lon": "-80.1928"
+        }
+      },
+      "id": "user_country",
+      "address_components": [
+        {
+          "long_name": "United States",
+          "short_name": "US",
+          "types": [
+            "country"
+          ]
+        }
+      ],
+      "options": {
+        "flexible_regions": [
+          "anywhere_in_continent",
+          "anywhere_in_world"
+        ]
+      }
+    }
+  ],
+  "workplaceTypes": [
+    "Remote",
+    "Hybrid"
+  ],
+  "defaultToUserLocation": true,
+  "userLocation": null,
+  "physicalEnvironments": [
+    "Office",
+    "Outdoor",
+    "Vehicle",
+    "Industrial",
+    "Customer-Facing"
+  ],
+  "physicalLaborIntensity": [
+    "Low",
+    "Medium",
+    "High"
+  ],
+  "physicalPositions": [
+    "Sitting",
+    "Standing"
+  ],
+  "oralCommunicationLevels": [
+    "Low",
+    "Medium",
+    "High"
+  ],
+  "computerUsageLevels": [
+    "Low",
+    "Medium",
+    "High"
+  ],
+  "cognitiveDemandLevels": [
+    "Low",
+    "Medium",
+    "High"
+  ],
+  "currency": {
+    "label": "Any",
+    "value": null
+  },
+  "frequency": {
+    "label": "Any",
+    "value": null
+  },
+  "minCompensationLowEnd": null,
+  "minCompensationHighEnd": null,
+  "maxCompensationLowEnd": null,
+  "maxCompensationHighEnd": null,
+  "restrictJobsToTransparentSalaries": false,
+  "calcFrequency": "Yearly",
+  "commitmentTypes": [
+    "Full Time",
+    "Part Time",
+    "Contract"
+  ],
+  "jobTitleQuery": "",
+  "jobDescriptionQuery": "",
+  "associatesDegreeFieldsOfStudy": [],
+  "excludedAssociatesDegreeFieldsOfStudy": [],
+  "bachelorsDegreeFieldsOfStudy": [],
+  "excludedBachelorsDegreeFieldsOfStudy": [],
+  "mastersDegreeFieldsOfStudy": [],
+  "excludedMastersDegreeFieldsOfStudy": [],
+  "doctorateDegreeFieldsOfStudy": [],
+  "excludedDoctorateDegreeFieldsOfStudy": [],
+  "associatesDegreeRequirements": [],
+  "bachelorsDegreeRequirements": [],
+  "mastersDegreeRequirements": [],
+  "doctorateDegreeRequirements": [],
+  "licensesAndCertifications": [],
+  "excludedLicensesAndCertifications": [],
+  "excludeAllLicensesAndCertifications": false,
+  "seniorityLevel": [
+    "No Prior Experience Required",
+    "Entry Level",
+    "Mid Level",
+    "Senior Level"
+  ],
+  "roleTypes": [
+    "Individual Contributor",
+    "People Manager"
+  ],
+  "roleYoeRange": [
+    0,
+    20
+  ],
+  "excludeIfRoleYoeIsNotSpecified": false,
+  "managementYoeRange": [
+    0,
+    20
+  ],
+  "excludeIfManagementYoeIsNotSpecified": false,
+  "securityClearances": [
+    "None",
+    "Confidential",
+    "Secret",
+    "Top Secret",
+    "Top Secret/SCI",
+    "Public Trust",
+    "Interim Clearances",
+    "Other"
+  ],
+  "languageRequirements": [],
+  "excludedLanguageRequirements": [],
+  "languageRequirementsOperator": "OR",
+  "excludeJobsWithAdditionalLanguageRequirements": false,
+  "airTravelRequirement": [
+    "None",
+    "Minimal",
+    "Moderate",
+    "Extensive"
+  ],
+  "landTravelRequirement": [
+    "None",
+    "Minimal",
+    "Moderate",
+    "Extensive"
+  ],
+  "morningShiftWork": [],
+  "eveningShiftWork": [],
+  "overnightShiftWork": [],
+  "weekendAvailabilityRequired": "Doesn't Matter",
+  "holidayAvailabilityRequired": "Doesn't Matter",
+  "overtimeRequired": "Doesn't Matter",
+  "onCallRequirements": [
+    "None",
+    "Occasional (once a month or less)",
+    "Regular (once a week or more)"
+  ],
+  "benefitsAndPerks": [],
+  "applicationFormEase": [],
+  "companyNames": [],
+  "excludedCompanyNames": [],
+  "companyHqCountries": [],
+  "excludedCompanyHqCountries": [],
+  "usaGovPref": null,
+  "industries": [],
+  "excludedIndustries": [],
+  "companyKeywords": [],
+  "companyKeywordsBooleanOperator": "OR",
+  "excludedCompanyKeywords": [],
+  "hideJobTypes": [],
+  "encouragedToApply": [],
+  "searchQuery": "",
+  "dateFetchedPastNDays": 2,
+  "hiddenCompanies": [],
+  "user": null,
+  "searchModeSelectedCompany": null,
+  "departments": [],
+  "restrictedSearchAttributes": [],
+  "sortBy": "default",
+  "technologyKeywordsQuery": "",
+  "requirementsKeywordsQuery": "",
+  "companyPublicOrPrivate": "all",
+  "latestInvestmentYearRange": [
+    null,
+    null
+  ],
+  "latestInvestmentSeries": [],
+  "latestInvestmentAmount": null,
+  "latestInvestmentCurrency": [],
+  "investors": [],
+  "excludedInvestors": [],
+  "isNonProfit": "all",
+  "organizationTypes": [],
+  "excludedOrganizationTypes": [],
+  "companySizeRanges": [],
+  "minYearFounded": null,
+  "maxYearFounded": null,
+  "excludedLatestInvestmentSeries": []
+}

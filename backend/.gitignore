@@ -2,7 +2,6 @@
 __pycache__/
 *.pyc
 *.pyo
-.env
 resumes/*.pdf
 mongodb/
 .ruff_cache/

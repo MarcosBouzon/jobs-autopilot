@@ -23,7 +23,7 @@ class Config:
     redis_port: int = int(os.getenv("REDIS_PORT", "16379"))
     redis_url: str = os.getenv("REDIS_URL", f"redis://{redis_host}:{redis_port}/0")
     celery_broker_url: str = os.getenv("CELERY_BROKER_URL", f"redis://{redis_host}:{redis_port}/1")
-    resumes_dir: str = os.getenv("RESUMES_DIR", "resumes")
+    flaresolverr_url: str = os.getenv("FLARESOLVERR_URL", "http://localhost:8191")
     debug: bool = os.getenv("DEBUG", "false").lower() == "true"
 
 

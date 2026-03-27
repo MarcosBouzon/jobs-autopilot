@@ -45,10 +45,12 @@ class LinkedIn(Scrapper):
 
     @classmethod
     async def create(cls) -> "LinkedIn":
-        """Async factory that loads settings from the database."""
+        """Async factory that creates a LinkedIn scrapper instance."""
+
         db = get_task_db()
         doc = await db.settings.find_one({"_id": SETTINGS_DOC_ID})
         settings = Settings.model_validate(doc) if doc else Settings()
+
         return cls(settings)
 
     async def get_job_ids(self):
@@ -232,7 +234,7 @@ class LinkedIn(Scrapper):
                 continue
 
             job_post = JobPost.model_validate(job_details)
-            
+
             try:
                 await db.jobs.insert_one(job_post.model_dump(exclude={"id"}))
                 self.logger.info("Saved job: %s", job_post.title)

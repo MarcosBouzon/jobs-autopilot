@@ -3,6 +3,7 @@ import logging
 
 from app.celery_app import celery
 from app.scrappers import Scrapper
+from app.scrappers.hiringcafe import HiringCafe
 from app.scrappers.indeed import Indeed
 from app.scrappers.linkedin import LinkedIn
 from app.tasks.utils import task_lock
@@ -10,6 +11,7 @@ from app.tasks.utils import task_lock
 JOB_BOARDS = {
     "indeed": Indeed,
     "linkedin": LinkedIn,
+    "hiringcafe": HiringCafe,
 }
 logger = logging.getLogger(__name__)
 
@@ -67,5 +69,6 @@ def fetch_jobs():
 
         for board in JOB_BOARDS:
             fetch_jobs_for_board.delay(board=board)
+            # fetch_jobs_for_board(board=board)
 
         return {"dispatched": list(JOB_BOARDS.keys())}

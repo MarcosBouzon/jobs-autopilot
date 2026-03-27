@@ -8,6 +8,6 @@ RUN uv sync --frozen --no-dev
 COPY app/ ./app/
 COPY run.py ./
 
-RUN mkdir -p resumes
+RUN mkdir -p ~/Desktop/resumes
 
 CMD ["uv", "run", "python", "run.py"]

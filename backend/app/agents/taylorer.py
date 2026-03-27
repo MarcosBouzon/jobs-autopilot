@@ -15,7 +15,6 @@ from app.agents.utils import (
     handle_rate_limit_error,
     load_resume,
 )
-from app.config import config
 from app.models.job import JobPost
 from app.models.settings import SETTINGS_DOC_ID, Settings
 from app.tasks.utils import get_task_db
@@ -260,7 +259,7 @@ async def validate_taylored_resume(
             msg += f" {', '.join(matches)}"
             errors.append(msg)
 
-    original_resume = load_resume()
+    original_resume = load_resume(settings.config.resumes_dir)
     taylored_resume = f"TITLE: {taylored.title}\n"
     taylored_resume += f"SUMMARY: {taylored.summary}\n"
     taylored_resume += f"SKILLS: {taylored.skills.model_dump_json()}\n"
@@ -337,7 +336,7 @@ async def taylor_resume(job: JobPost) -> str:
         logger.error(msg)
         return ""
 
-    resume = load_resume()
+    resume = load_resume(settings.config.resumes_dir)
     taylor_prompt = f"ORIGINAL RESUME:\n{resume}\n\n"
     taylor_prompt += "---\n\n"
     taylor_prompt += "TARGET JOB:\n"
@@ -387,14 +386,17 @@ async def taylor_resume(job: JobPost) -> str:
         logger.warning(msg, job.title)
         return ""
 
-    resume_dir = Path(config.resumes_dir)
+    resume_dir = Path(settings.config.resumes_dir)
+    resume_dir.mkdir(parents=True, exist_ok=True)
+
     file_title = re.sub(r"[^\w\s-]", "", job.title).strip()[:50].replace(" ", "_")
     company = re.sub(r"[^\w\s-]", "", job.company or "").strip()[:50].replace(" ", "_")
     timestamp = datetime.now(UTC).strftime("%Y%m%d%H%M%S")
     file_title = f"{file_title}_{company}_{timestamp}.pdf"
-    resume_path = resume_dir / file_title
 
+    resume_path = resume_dir / file_title
     generated = await convert_to_pdf(taylored, resume_path)
+
     if generated:
         return str(resume_path)
 

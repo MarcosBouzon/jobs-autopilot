@@ -17,6 +17,15 @@ services:
     ports:
       - "16379:6379"
 
+  flaresolverr:
+    image: ghcr.io/flaresolverr/flaresolverr:latest
+    container_name: autopilot-flaresolverr
+    restart: unless-stopped
+    environment:
+      LOG_LEVEL: info
+    ports:
+      - "8191:8191"
+
   backend:
     build:
       context: ./backend
@@ -34,7 +43,7 @@ services:
       REDIS_PORT: 6379
       CELERY_BROKER_URL: redis://redis:6379/1
     volumes:
-      - ./backend/resumes:/app/resumes
+      - ~/Desktop/resumes:/root/Desktop/resumes
 
   worker:
     build:
@@ -49,11 +58,13 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: 6379
       CELERY_BROKER_URL: redis://redis:6379/1
+      FLARESOLVERR_URL: http://flaresolverr:8191
     depends_on:
       - mongodb
       - redis
+      - flaresolverr
     volumes:
-      - ./backend/resumes:/app/resumes
+      - ~/Desktop/resumes:/home/worker/Desktop/resumes
       - ./backend/app:/app/app
 
   scheduler:

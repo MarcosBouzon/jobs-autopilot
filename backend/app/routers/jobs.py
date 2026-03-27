@@ -24,7 +24,10 @@ def _parse_object_id(oid: str) -> ObjectId:
 
 @router.get("/jobs/", response_model=list[JobPost])
 async def list_jobs(
-    db: DB, applied: bool | None = None, search: str | None = None
+    db: DB,
+    applied: bool | None = None,
+    search: str | None = None,
+    board: str | None = None,
 ) -> list[JobPost]:
     """Return all job postings, optionally filtered by applied status and title."""
 
@@ -35,6 +38,8 @@ async def list_jobs(
     if search:
         pattern = {"$regex": search, "$options": "i"}
         query["$or"] = [{"title": pattern}, {"company": pattern}]
+    if board:
+        query["job_board"] = board
     docs = await db.jobs.find(query).sort("autopilot_created", -1).to_list(length=None)
 
     return [JobPost.model_validate(doc) for doc in docs]

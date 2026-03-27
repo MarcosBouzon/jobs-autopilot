@@ -5,8 +5,8 @@ from bson.errors import InvalidId
 from fastapi import APIRouter, File, HTTPException, UploadFile, status
 from fastapi.responses import FileResponse
 
-from app.config import config
 from app.database import DB
+from app.models.settings import SETTINGS_DOC_ID, Settings
 
 router = APIRouter(tags=["Resume"])
 
@@ -46,10 +46,12 @@ async def get_resume(jid: str, db: DB) -> FileResponse:
 
 
 @router.post("/resume/")
-async def upload_resume(file: UploadFile = File(...)) -> dict[str, str]:
+async def upload_resume(db: DB, file: UploadFile = File(...)) -> dict[str, str]:
     """Accept a PDF resume upload and save it to the resumes directory."""
 
-    dest = Path(config.resumes_dir) / "user_resume.pdf"
+    doc = await db.settings.find_one({"_id": SETTINGS_DOC_ID})
+    settings = Settings.model_validate(doc) if doc else Settings()
+    dest = Path(settings.config.resumes_dir) / "user_resume.pdf"
     dest.parent.mkdir(parents=True, exist_ok=True)
     contents = await file.read()
     dest.write_bytes(contents)

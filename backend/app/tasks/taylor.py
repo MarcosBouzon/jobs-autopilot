@@ -67,7 +67,7 @@ def taylor_resumes() -> dict[str, object]:  # type: ignore[type-arg]
             jobs = [{**doc, "_id": str(doc["_id"])} async for doc in cursor]
             logger.info("Dispatching taylor tasks for %d jobs", len(jobs))
 
-            for job in jobs[:10]:
+            for job in jobs:
                 taylor.delay(job=job)
                 # await _taylor(job)
 

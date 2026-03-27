@@ -13,6 +13,12 @@ import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 import { useGetJobQuery, useApplyJobMutation, useDeleteJobMutation } from "../store/apiSlice.js";
 
+function decodeHtmlEntities(str) {
+  const el = document.createElement("textarea");
+  el.innerHTML = str;
+  return el.value;
+}
+
 function JobDetailsPage() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -128,9 +134,12 @@ function JobDetailsPage() {
         <Typography variant="h6" sx={{ mb: 2 }}>
           Job Description
         </Typography>
-        <Typography variant="body1" sx={{ whiteSpace: "pre-line" }}>
-          {job.description}
-        </Typography>
+        <Box
+          sx={{ "& img": { maxWidth: "100%" } }}
+          dangerouslySetInnerHTML={{
+            __html: decodeHtmlEntities(job.description),
+          }}
+        />
       </Paper>
     </>
   );

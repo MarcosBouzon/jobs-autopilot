@@ -37,6 +37,7 @@ async def score(jid: str, db: DB) -> dict[str, str]:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Job not found"
         )
+    job["_id"] = str(job["_id"])
     task = score_job.delay(job=job)
 
     return {"task_id": task.id}
@@ -63,6 +64,7 @@ async def apply(
         )
         return {"task_id": "manual"}
 
+    job["_id"] = str(job["_id"])
     task = apply_job.delay(job=job)
 
     return {"task_id": task.id}

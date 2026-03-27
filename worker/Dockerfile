@@ -9,7 +9,8 @@ RUN uv run playwright install --with-deps chromium
 
 RUN groupadd --gid 1000 worker && \
     useradd --uid 1000 --gid worker --create-home --shell /bin/bash worker && \
-    chown -R worker:worker /app
+    mkdir -p /home/worker/Desktop/resumes && \
+    chown -R worker:worker /app /home/worker/Desktop
 
 COPY backend/app ./app
 

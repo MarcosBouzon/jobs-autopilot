@@ -16,23 +16,27 @@ logger = logging.getLogger(__name__)
 
 
 def get_scorer_prompt(settings: Settings) -> str:
+    resume = load_resume(settings.config.resumes_dir)
     known_skils = set(
         settings.form.programming_languages
         + settings.form.frameworks
         + settings.form.tools
     )
 
-    scorer_prompt = f"""You are a job fit evaluator. Given a candidate's resume, known skills,
-aditional details provided by the client, and a job description, score how well the
-candidate fits the role on a scale of 0 to 10.
+    scorer_prompt = f"""You are a job fit evaluator. Given a candidate's resume, known
+skills, aditional details provided by the client, and a job description, score how well
+the candidate fits the role on a scale of 0 to 10.
 
-CANDIDATE KNOWN SKILLS:
+## CANDIDATE RESUME:
+{resume}
+
+## CANDIDATE KNOWN SKILLS:
 - {', '.join(known_skils)}
 
-CANDIDATE ADDITIONAL DETAILS:
+## CANDIDATE ADDITIONAL DETAILS:
 - {settings.form.about}
 
-CANDIDATE FACTS:
+## CANDIDATE FACTS:
 - Assume the candidate has consulting experience.
 
 SCORING CRITERIA:
@@ -73,6 +77,7 @@ async def score_job(job: JobPost) -> JobScore | None:
     Returns:
         JobScore if successful, None if no LLM is configured.
     """
+
     db = get_task_db()
     doc = await db.settings.find_one({"_id": SETTINGS_DOC_ID})
     settings = Settings.model_validate(doc) if doc else Settings()
@@ -86,17 +91,7 @@ async def score_job(job: JobPost) -> JobScore | None:
         logger.error(msg)
         return None
 
-    known_skills = set(
-        settings.form.programming_languages
-        + settings.form.frameworks
-        + settings.form.tools
-    )
-
-    resume = load_resume()
-    prompt = f"## Resume\n\n{resume}\n\n"
-    prompt += f"## Candidate's Known Skills\n\n{known_skills}\n\n"
-    prompt += f"## Additional Details\n\n{settings.form.about}\n\n"
-    prompt += f"## Job Description\n\n{job.description}"
+    prompt = f"## Job Description\n\n{job.description}"
 
     result = await Runner.run(agent, prompt)
     return result.final_output

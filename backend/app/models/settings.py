@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from pydantic import BaseModel, Field
 
 SETTINGS_DOC_ID = "singleton"
@@ -6,6 +8,7 @@ from pydantic import BaseModel
 
 
 class Config(BaseModel):
+    resumes_dir: str = str(Path.home() / "Desktop" / "resumes")
     auto_apply: bool = False
     openai_api_key: str = ""
     gemini_api_key: str = ""
@@ -17,6 +20,8 @@ class Config(BaseModel):
     jsession_id: str = ""
     linkedin_user: str = ""
     linkedin_pass: str = ""
+    hc_email: str = ""
+    hc_password: str = ""
     remote: bool = False
     hybrid: bool = False
     on_site: bool = False

@@ -34,6 +34,7 @@ function JobsTable({ jobs, detailsOnly = false, emptyMessage = "No jobs to displ
             <TableCell>Location</TableCell>
             <TableCell>Salary</TableCell>
             <TableCell>Company</TableCell>
+            <TableCell>Platform</TableCell>
             <TableCell>Score</TableCell>
             <TableCell>Actions</TableCell>
           </TableRow>
@@ -41,7 +42,7 @@ function JobsTable({ jobs, detailsOnly = false, emptyMessage = "No jobs to displ
         <TableBody>
           {jobs.length === 0 && (
             <TableRow>
-              <TableCell colSpan={6} align="center" sx={{ py: 4, color: "text.secondary" }}>
+              <TableCell colSpan={7} align="center" sx={{ py: 4, color: "text.secondary" }}>
                 {emptyMessage}
               </TableCell>
             </TableRow>
@@ -52,6 +53,7 @@ function JobsTable({ jobs, detailsOnly = false, emptyMessage = "No jobs to displ
               <TableCell>{job.location}</TableCell>
               <TableCell>{job.salary ?? "—"}</TableCell>
               <TableCell>{job.company ?? "—"}</TableCell>
+              <TableCell>{job.job_board ?? "—"}</TableCell>
               <TableCell>{job.score}</TableCell>
               <TableCell>
                 <Stack direction="row" spacing={0.5}>
